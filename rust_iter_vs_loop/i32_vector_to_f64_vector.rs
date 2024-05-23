@@ -22,15 +22,16 @@ impl Timer {
     }
 }
 
-fn do_iterator_test(iter_test: Vec<i32>) -> Vec<f64> {
-    iter_test.iter().map(|&x| x as f64).collect()
+fn do_iterator_test(input: Vec<i32>) -> Vec<f64> {
+    input.iter().map(|&x| x as f64).collect()
 }
 
-fn do_for_test(iter_test: Vec<i32>) -> Vec<f64> {
-    let mut result = Vec::new();
-    result.reserve(iter_test.len());
-    for i in 0..iter_test.len() {
-        result.push(iter_test[i] as f64);
+fn do_loop_test(input: Vec<i32>) -> Vec<f64> {
+    let mut result = vec![0_f64; input.len()];
+    let mut i = 0;
+    while i < input.len() {
+        result[i] = input[i] as f64;
+        i += 1;
     }
     result
 }
@@ -38,16 +39,16 @@ fn do_for_test(iter_test: Vec<i32>) -> Vec<f64> {
 fn main() {
     const N: usize = 1_000_000_000;
 
-    let mut for_test = vec![1; N];
+    let mut loop_test = vec![1; N];
     let mut iter_test = vec![1; N];
     for i in 0..N {
-        for_test[i] = i as i32;
+        loop_test[i] = i as i32;
         iter_test[i] = i as i32;
     }
 
     let timer = Timer::new();
-    let sum_1 = do_for_test(for_test);
-    println!("for: {}ms", timer.elapsed_as_millis());
+    let sum_1 = do_loop_test(loop_test);
+    println!("loop: {}ms", timer.elapsed_as_millis());
 
     let timer = Timer::new();
     let sum_2 = do_iterator_test(iter_test);
