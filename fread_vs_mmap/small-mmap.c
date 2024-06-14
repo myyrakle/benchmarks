@@ -17,7 +17,7 @@ int main()
     long filesize = ftell(file);
     rewind(file);
 
-    int count = 5000;
+    int count = 500000;
 
     char *result = (char *)malloc(filesize * count * 2);
     result[0] = '\0';
@@ -44,6 +44,9 @@ int main()
 
         // append buffer to result
         strncat(result, buffer, filesize);
+
+        // close file descriptor
+        close(file_descriptor);
     }
 
     clock_t end = clock();
