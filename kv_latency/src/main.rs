@@ -1,13 +1,13 @@
-use kv_latency::postgres;
+use kv_latency::mysql;
 
 fn main() {
-    let mut client = postgres::create_postgres_client().unwrap();
-    postgres::init_schema(&mut client).unwrap();
+    let mut client = mysql::create_postgres_client().unwrap();
+    mysql::init_schema(&mut client).unwrap();
 
     let key = "asdf";
     let value = "qwerty";
-    postgres::set_key_value(&mut client, key, value).unwrap();
+    mysql::set_key_value(&mut client, key, value).unwrap();
 
-    let value = postgres::get_key_value(&mut client, key).unwrap();
+    let value = mysql::get_key_value(&mut client, key).unwrap();
     println!("Key: {}, Value: {}", key, value);
 }
