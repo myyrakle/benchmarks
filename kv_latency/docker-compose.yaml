@@ -1,0 +1,29 @@
+services:
+  memcached:
+    image: memcached:1.6.9
+    ports:
+      - "21211:11211"
+
+  redis:
+    image: redis:7.0.11
+    ports:
+      - "16379:6379"
+
+  postgres:
+    image: postgres:16.0
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: testdb
+    
+  mysql:
+    image: mysql:8.0.34
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
