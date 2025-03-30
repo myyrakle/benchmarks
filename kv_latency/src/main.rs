@@ -1,11 +1,14 @@
-use kv_latency::memcached;
+use kv_latency::postgres;
 
-fn main() {
-    let mut client = memcached::create_memcached_client().unwrap();
+#[tokio::main]
+async fn main() {
+    let mut client: sqlx::Pool<sqlx::Postgres> = postgres::create_postgres_client().unwrap();
+    postgres::init_schema(&mut client).unwrap();
+
     let key = "asdf";
     let value = "qwerty";
-    memcached::set_key_value(&mut client, key, value).unwrap();
+    postgres::set_key_value(&mut client, key, value).unwrap();
 
-    let retrieved_value = memcached::get_key_value(&mut client, key).unwrap();
-    println!("Retrieved value: {}", retrieved_value);
+    let value = postgres::get_key_value(&mut client, key).unwrap();
+    println!("Key: {}, Value: {}", key, value);
 }

@@ -2,6 +2,7 @@
 extern crate test;
 
 pub mod memcached;
+pub mod postgres;
 pub mod redis;
 
 pub const KV_COUNT: usize = 1000;

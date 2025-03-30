@@ -7,3 +7,6 @@ edition = "2024"
 anyhow = "1.0.97"
 redis = "0.29.2"
 memcache = "0.18.0"
+sqlx = { version = "0.8", features = [ "runtime-tokio", "tls-native-tls", "postgres", "mysql" ] }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3.31"
