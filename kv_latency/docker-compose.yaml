@@ -3,11 +3,21 @@ services:
     image: memcached:1.6.9
     ports:
       - "21211:11211"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   redis:
     image: redis:7.0.11
     ports:
       - "16379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   postgres:
     image: postgres:16.0
@@ -17,6 +27,11 @@ services:
       POSTGRES_USER: testuser
       POSTGRES_PASSWORD: testpassword
       POSTGRES_DB: testdb
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
     
   mysql:
     image: mysql:8.0.34
@@ -27,3 +42,8 @@ services:
       MYSQL_DATABASE: testdb
       MYSQL_USER: testuser
       MYSQL_PASSWORD: testpassword
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
