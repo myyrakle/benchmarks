@@ -177,3 +177,64 @@ fn bench_postgres_get_bulk(bencher: &mut test::Bencher) {
         });
     });
 }
+
+// mysql bench
+#[bench]
+fn bench_mysql_set_single(bencher: &mut test::Bencher) {
+    let mut client = mysql::create_postgres_client().unwrap();
+    mysql::init_schema(&mut client).unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    bencher.iter(|| {
+        mysql::set_key_value(&mut client, key, value).unwrap();
+    });
+}
+
+#[bench]
+fn bench_mysql_get_single(bencher: &mut test::Bencher) {
+    let mut client = mysql::create_postgres_client().unwrap();
+    mysql::init_schema(&mut client).unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    mysql::set_key_value(&mut client, key, value).unwrap();
+
+    bencher.iter(|| {
+        mysql::get_key_value(&mut client, key).unwrap();
+    });
+}
+
+#[bench]
+fn bench_mysql_set_bulk(bencher: &mut test::Bencher) {
+    let mut client = mysql::create_postgres_client().unwrap();
+    mysql::init_schema(&mut client).unwrap();
+
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, value)| {
+            mysql::set_key_value(&mut client, key, value).unwrap();
+        });
+    });
+}
+
+#[bench]
+fn bench_mysql_get_bulk(bencher: &mut test::Bencher) {
+    let mut client = mysql::create_postgres_client().unwrap();
+    mysql::init_schema(&mut client).unwrap();
+
+    let entries = generate_kv_entries(KV_COUNT);
+
+    entries.iter().for_each(|(key, value)| {
+        mysql::set_key_value(&mut client, key, value).unwrap();
+    });
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, _)| {
+            mysql::get_key_value(&mut client, key).unwrap();
+        });
+    });
+}
