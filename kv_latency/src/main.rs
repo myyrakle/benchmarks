@@ -1,8 +1,7 @@
 use kv_latency::postgres;
 
-#[tokio::main]
-async fn main() {
-    let mut client: sqlx::Pool<sqlx::Postgres> = postgres::create_postgres_client().unwrap();
+fn main() {
+    let mut client = postgres::create_postgres_client().unwrap();
     postgres::init_schema(&mut client).unwrap();
 
     let key = "asdf";

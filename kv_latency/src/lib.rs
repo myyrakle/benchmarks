@@ -115,3 +115,64 @@ fn bench_memcached_get_bulk(bencher: &mut test::Bencher) {
         });
     });
 }
+
+// postgres bench
+#[bench]
+fn bench_postgres_set_single(bencher: &mut test::Bencher) {
+    let mut client = postgres::create_postgres_client().unwrap();
+    postgres::init_schema(&mut client).unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    bencher.iter(|| {
+        postgres::set_key_value(&mut client, key, value).unwrap();
+    });
+}
+
+#[bench]
+fn bench_postgres_get_single(bencher: &mut test::Bencher) {
+    let mut client = postgres::create_postgres_client().unwrap();
+    postgres::init_schema(&mut client).unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    postgres::set_key_value(&mut client, key, value).unwrap();
+
+    bencher.iter(|| {
+        postgres::get_key_value(&mut client, key).unwrap();
+    });
+}
+
+#[bench]
+fn bench_postgres_set_bulk(bencher: &mut test::Bencher) {
+    let mut client = postgres::create_postgres_client().unwrap();
+    postgres::init_schema(&mut client).unwrap();
+
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, value)| {
+            postgres::set_key_value(&mut client, key, value).unwrap();
+        });
+    });
+}
+
+#[bench]
+fn bench_postgres_get_bulk(bencher: &mut test::Bencher) {
+    let mut client = postgres::create_postgres_client().unwrap();
+    postgres::init_schema(&mut client).unwrap();
+
+    let entries = generate_kv_entries(KV_COUNT);
+
+    entries.iter().for_each(|(key, value)| {
+        postgres::set_key_value(&mut client, key, value).unwrap();
+    });
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, _)| {
+            postgres::get_key_value(&mut client, key).unwrap();
+        });
+    });
+}
