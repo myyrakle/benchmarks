@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.97"
 redis = "0.29.2"
+memcache = "0.18.0"

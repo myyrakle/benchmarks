@@ -1,6 +1,7 @@
 #![feature(test)]
 extern crate test;
 
+pub mod memcached;
 pub mod redis;
 
 pub const KV_COUNT: usize = 1000;
@@ -59,6 +60,57 @@ fn bench_redis_get_bulk(bencher: &mut test::Bencher) {
     bencher.iter(|| {
         entries.iter().for_each(|(key, _)| {
             redis::get_key_value(&mut connection, key).unwrap();
+        });
+    });
+}
+
+// Memcached
+
+#[bench]
+fn bench_memcached_set_single(bencher: &mut test::Bencher) {
+    let mut connection = memcached::create_memcached_client().unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    bencher.iter(|| {
+        memcached::set_key_value(&mut connection, key, value).unwrap();
+    });
+}
+
+#[bench]
+fn bench_memcached_get_single(bencher: &mut test::Bencher) {
+    let mut connection = memcached::create_memcached_client().unwrap();
+    let key = "asdf";
+    let value = "qwerty";
+
+    memcached::set_key_value(&mut connection, key, value).unwrap();
+
+    bencher.iter(|| {
+        memcached::get_key_value(&mut connection, key).unwrap();
+    });
+}
+
+#[bench]
+fn bench_memcached_set_bulk(bencher: &mut test::Bencher) {
+    let mut connection = memcached::create_memcached_client().unwrap();
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, value)| {
+            memcached::set_key_value(&mut connection, key, value).unwrap();
+        });
+    });
+}
+
+#[bench]
+fn bench_memcached_get_bulk(bencher: &mut test::Bencher) {
+    let mut connection = memcached::create_memcached_client().unwrap();
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, _)| {
+            memcached::get_key_value(&mut connection, key).unwrap();
         });
     });
 }
