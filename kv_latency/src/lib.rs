@@ -60,6 +60,10 @@ fn bench_redis_get_bulk(bencher: &mut test::Bencher) {
     let mut connection = redis::create_redis_client().unwrap();
     let entries = generate_kv_entries(KV_COUNT);
 
+    entries.iter().for_each(|(key, value)| {
+        redis::set_key_value(&mut connection, key, value).unwrap();
+    });
+
     bencher.iter(|| {
         entries.iter().for_each(|(key, _)| {
             redis::get_key_value(&mut connection, key).unwrap();
@@ -236,6 +240,56 @@ fn bench_mysql_get_bulk(bencher: &mut test::Bencher) {
     bencher.iter(|| {
         entries.iter().for_each(|(key, _)| {
             mysql::get_key_value(&mut client, key).unwrap();
+        });
+    });
+}
+
+// rstore bench
+#[bench]
+fn bench_rstore_set_single(bencher: &mut test::Bencher) {
+    let client = rstore::create_rstore_client().unwrap();
+
+    let key = "asdf";
+    let value = "qwerty";
+
+    bencher.iter(|| {
+        rstore::set_key_value(&client, key, value).unwrap();
+    });
+}
+
+#[bench]
+fn bench_rstore_get_single(bencher: &mut test::Bencher) {
+    let client = rstore::create_rstore_client().unwrap();
+    let key = "asdf";
+    let value = "qwerty";
+
+    rstore::set_key_value(&client, key, value).unwrap();
+
+    bencher.iter(|| {
+        rstore::get_key_value(&client, key).unwrap();
+    });
+}
+
+#[bench]
+fn bench_rstore_set_bulk(bencher: &mut test::Bencher) {
+    let client = rstore::create_rstore_client().unwrap();
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, value)| {
+            rstore::set_key_value(&client, key, value).unwrap();
+        });
+    });
+}
+
+#[bench]
+fn bench_rstore_get_bulk(bencher: &mut test::Bencher) {
+    let client = rstore::create_rstore_client().unwrap();
+    let entries = generate_kv_entries(KV_COUNT);
+
+    bencher.iter(|| {
+        entries.iter().for_each(|(key, _)| {
+            rstore::get_key_value(&client, key).unwrap();
         });
     });
 }

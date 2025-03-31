@@ -1,13 +1,13 @@
-use kv_latency::mysql;
+use kv_latency::rstore;
 
 fn main() {
-    let mut client = mysql::create_postgres_client().unwrap();
-    mysql::init_schema(&mut client).unwrap();
+    let client = rstore::create_rstore_client().unwrap();
 
     let key = "asdf";
     let value = "qwerty";
-    mysql::set_key_value(&mut client, key, value).unwrap();
 
-    let value = mysql::get_key_value(&mut client, key).unwrap();
-    println!("Key: {}, Value: {}", key, value);
+    rstore::set_key_value(&client, key, value).unwrap();
+
+    let retrieved_value = rstore::get_key_value(&client, key).unwrap();
+    println!("Retrieved value: {}", retrieved_value);
 }

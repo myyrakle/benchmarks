@@ -10,9 +10,11 @@ pub fn create_rstore_client() -> anyhow::Result<Client> {
 
 pub fn set_key_value(client: &Client, key: &str, value: &str) -> anyhow::Result<()> {
     let request_body = format!("{{\"key\": \"{}\", \"value\": \"{}\"}}", key, value);
+    println!("Request body: {}", request_body);
 
     client
-        .get("http://localhost:13535/value")
+        .post("http://localhost:13535/value")
+        .header("Content-Type", "application/json")
         .body(request_body)
         .send()?;
 
@@ -21,7 +23,6 @@ pub fn set_key_value(client: &Client, key: &str, value: &str) -> anyhow::Result<
 
 #[derive(serde::Deserialize)]
 pub struct RStoreGetResponse {
-    pub key: String,
     pub value: String,
 }
 
@@ -31,6 +32,7 @@ pub fn get_key_value(client: &Client, key: &str) -> anyhow::Result<String> {
         .send()?;
 
     let response_body = response.text()?;
+    println!("Response body: {}", response_body);
 
     let response: RStoreGetResponse = serde_json::from_str(&response_body)?;
     let value = response.value;
