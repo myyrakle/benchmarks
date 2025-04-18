@@ -20,3 +20,7 @@ path = "./src/gen.rs"
 [[bin]]
 name = "init_pgvector_ivfflat" 
 path = "./src/init_pgvector_ivfflat.rs"
+
+[[bin]]
+name = "init_pgvector_hnsw" 
+path = "./src/init_pgvector_hnsw.rs"
