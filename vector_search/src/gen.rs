@@ -26,12 +26,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut randomizer = rand::rng();
 
     for i in 0..NUM_VECTORS {
-        let vector: Vec<f64> = (0..VECTOR_DIM)
+        let vector: Vec<f32> = (0..VECTOR_DIM)
             .map(|_| randomizer.random_range(-1.0..1.0))
             .collect();
 
+        let magnitude: f32 = vector.iter().map(|&val| val * val).sum::<f32>().sqrt();
+
+        // 각 요소를 크기로 나누어 정규화
+        let normalized_vector: Vec<half::f16> = vector
+            .iter()
+            .map(|&val| half::f16::from_f32(val / magnitude))
+            .collect();
+
         // 벡터를 문자열 레코드로 변환
-        let record: Vec<String> = vector.iter().map(|&val| val.to_string()).collect();
+        let record: Vec<String> = normalized_vector
+            .iter()
+            .map(|&val| val.to_string())
+            .collect();
 
         // 진행 상황 표시 (선택 사항, 성능에 약간 영향 줄 수 있음)
         if (i + 1) % 1_000_000 == 0 {

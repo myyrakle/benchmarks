@@ -8,6 +8,7 @@ rand = "0.9"
 tokio = { version = "1", features = ["full"] }
 sqlx = { version = "0.7", features = [ "runtime-tokio", "postgres" ] }
 anyhow = "1.0.92"
+half = "2.6.0"
 
 [[bin]]
 name = "main"
