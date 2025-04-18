@@ -14,33 +14,50 @@ services:
       - esdata:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
   pgvector-IVFFlat:
     image: pgvector/pgvector:0.8.0-pg17
     container_name: pgvector-ivfflat
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_PASSWORD=q1w2e3r4
       - POSTGRES_DB=postgres
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
-      - pgdata-IVFFlat:/var/lib/postgresql/data
+      - pg-IVFFlat:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
   pgvector-HNSW:
     image: pgvector/pgvector:0.8.0-pg17
     container_name: pgvector-hnsw
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_PASSWORD=q1w2e3r4
       - POSTGRES_DB=postgres
     ports:
-      - "5433:5432"
+      - "15433:5432"
     volumes:
-      - pgdata-HNSW:/var/lib/postgresql/data
+      - pg-HNSW:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
 
 volumes:
   esdata:
     driver: local
-  pgdata-IVFFlat:
+  pg-IVFFlat:
     driver: local
-  pgdata-HNSW:
+  pg-HNSW:
     driver: local
