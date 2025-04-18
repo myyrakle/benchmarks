@@ -26,8 +26,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut randomizer = rand::rng();
 
     for i in 0..NUM_VECTORS {
-        let vector: Vec<i8> = (0..VECTOR_DIM)
-            .map(|_| randomizer.random_range(1..=127))
+        let vector: Vec<f64> = (0..VECTOR_DIM)
+            .map(|_| randomizer.random_range(-1.0..1.0))
             .collect();
 
         // 벡터를 문자열 레코드로 변환

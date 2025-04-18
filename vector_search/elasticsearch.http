@@ -1,0 +1,29 @@
+@PORT = 9200
+@HOST = localhost
+
+### 
+GET http://{{HOST}}:{{PORT}}/_cluster/health
+
+###
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/vector_index
+Content-Type: application/json
+
+{
+    "settings": {},
+    "mappings": {
+        "properties": {
+            "vector": {
+                "type": "dense_vector",
+                "dims": 256,
+                "index": true,
+                "similarity": "max_inner_product"
+            }
+        }
+    }
+}
+###
