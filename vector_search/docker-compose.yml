@@ -4,14 +4,12 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - ELASTIC_PASSWORD=changeme
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ELASTIC_PASSWORD=q1w2e3r4
     volumes:
-      - esdata:/usr/share/elasticsearch/data
+      - elasticsearch:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     deploy:
@@ -55,7 +53,7 @@ services:
           memory: 8096M
 
 volumes:
-  esdata:
+  elasticsearch:
     driver: local
   pg-IVFFlat:
     driver: local

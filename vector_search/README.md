@@ -13,3 +13,17 @@
 2. pgvector(HNSW)
 3. Elasticsearch
 4. Milvus
+
+## Setup
+
+generate 10 million vector row
+
+```bash
+cargo run --bin gen
+```
+
+run pgvector, elasticsearch
+
+```bash
+sudo docker compose up
+```
