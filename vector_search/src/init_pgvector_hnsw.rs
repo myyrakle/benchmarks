@@ -47,6 +47,8 @@ async fn main() -> anyhow::Result<()> {
     let reader = std::io::BufReader::new(vectors_file);
     let lines = reader.lines();
 
+    let start_time = std::time::Instant::now();
+
     let mut i = 0_i64;
     for line in lines {
         i += 1;
@@ -70,6 +72,9 @@ async fn main() -> anyhow::Result<()> {
         .await?;
     }
     println!("Inserted 10 million vectors into vector_table!");
+
+    let elapsed_time = start_time.elapsed();
+    println!("Elapsed time: {} seconds", elapsed_time.as_secs());
 
     Ok(())
 }
