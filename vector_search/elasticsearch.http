@@ -6,7 +6,16 @@ GET http://{{HOST}}:{{PORT}}/_cluster/health
 
 ###
 
+### 
+POST http://{{HOST}}:{{PORT}}/vector_index/_search
+Content-Type: application/json
 
+{
+    "query": {
+        "match_all": {}
+    }
+}
+###
 
 
 ### 
