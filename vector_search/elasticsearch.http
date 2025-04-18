@@ -48,6 +48,10 @@ Content-Type: application/json
 ###
 
 ### 
+GET http://{{HOST}}:{{PORT}}/vector_index
+###
+
+### 
 PUT http://{{HOST}}:{{PORT}}/vector_index/_bulk
 Content-Type: application/x-ndjson
 
@@ -92,3 +96,28 @@ Content-Type: application/json
 
 
 
+
+
+### 
+PUT http://{{HOST}}:{{PORT}}/vector_index2
+Content-Type: application/json
+
+{
+    "settings": {},
+    "mappings": {
+        "properties": {
+            "vector": {
+                "type": "dense_vector",
+                "dims": 256,
+                "index": true,
+                "index_options": {
+                    "type": "hnsw",
+                    "m": 16,
+                    "ef_construction": 200
+                },
+                "similarity": "dot_product"
+            }
+        }
+    }
+}
+###
