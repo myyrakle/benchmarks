@@ -36,5 +36,9 @@ name = "bench_pg_ivfflat"
 path = "./src/bench_pg_ivfflat.rs"
 
 [[bin]]
+name = "bench_pg_hnsw"
+path = "./src/bench_pg_hnsw.rs"
+
+[[bin]]
 name = "bench_elasticsearch"
 path = "./src/bench_elasticsearch.rs"
