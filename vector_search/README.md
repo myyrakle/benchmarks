@@ -12,7 +12,7 @@
 1. pgvector(IVFFlat)
 2. pgvector(HNSW)
 3. Elasticsearch
-4. Milvus
+4. Milvus (Not Yet)
 
 ## Setup
 
@@ -26,4 +26,18 @@ run pgvector, elasticsearch
 
 ```bash
 sudo docker compose up
+```
+
+## Example: Elasticsearch
+
+insert data
+
+```bash
+cargo run --bin init_elasticsearch
+```
+
+bench
+
+```bash
+cargo run --bin bench_elasticsearch
 ```
