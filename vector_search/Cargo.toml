@@ -17,7 +17,7 @@ path = "./src/main.rs"
 
 [[bin]]
 name = "gen"
-path = "./src/gen.rs"
+path = "./src/generate.rs"
 
 [[bin]]
 name = "init_pgvector_ivfflat" 
@@ -30,3 +30,7 @@ path = "./src/init_pgvector_hnsw.rs"
 [[bin]]
 name = "init_elasticsearch" 
 path = "./src/init_elasticsearch.rs"
+
+[[bin]]
+name = "bench_pg_ivfflat"
+path = "./src/bench_pg_ivfflat.rs"

@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use rand::Rng;
 use std::error::Error;
 use std::fs::OpenOptions;
