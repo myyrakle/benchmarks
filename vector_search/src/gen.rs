@@ -8,6 +8,24 @@ const NUM_VECTORS: usize = 10_000_000;
 const VECTOR_DIM: usize = 256;
 const OUTPUT_FILE: &str = "vectors.txt";
 
+pub fn generate_normalized_vector(dim: usize) -> Vec<half::f16> {
+    let mut randomizer = rand::rng();
+
+    let vector: Vec<f32> = (0..dim)
+        .map(|_| randomizer.random_range(-1.0..1.0))
+        .collect();
+
+    let magnitude: f32 = vector.iter().map(|&val| val * val).sum::<f32>().sqrt();
+
+    // 각 요소를 크기로 나누어 정규화
+    let normalized_vector: Vec<half::f16> = vector
+        .iter()
+        .map(|&val| half::f16::from_f32(val / magnitude))
+        .collect();
+
+    normalized_vector
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "Generating {} vectors of dimension {}...",
@@ -23,20 +41,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     let mut writer = BufWriter::new(file);
 
-    let mut randomizer = rand::rng();
-
     for i in 0..NUM_VECTORS {
-        let vector: Vec<f32> = (0..VECTOR_DIM)
-            .map(|_| randomizer.random_range(-1.0..1.0))
-            .collect();
-
-        let magnitude: f32 = vector.iter().map(|&val| val * val).sum::<f32>().sqrt();
-
-        // 각 요소를 크기로 나누어 정규화
-        let normalized_vector: Vec<half::f16> = vector
-            .iter()
-            .map(|&val| half::f16::from_f32(val / magnitude))
-            .collect();
+        let normalized_vector = generate_normalized_vector(VECTOR_DIM);
 
         // 벡터를 문자열 레코드로 변환
         let record: Vec<String> = normalized_vector
