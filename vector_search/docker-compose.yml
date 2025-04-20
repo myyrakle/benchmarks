@@ -1,0 +1,61 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ELASTIC_PASSWORD=q1w2e3r4
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
+  pgvector-IVFFlat:
+    image: pgvector/pgvector:0.8.0-pg17
+    container_name: pgvector-ivfflat
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=q1w2e3r4
+      - POSTGRES_DB=postgres
+    ports:
+      - "15432:5432"
+    volumes:
+      - pg-IVFFlat:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
+  pgvector-HNSW:
+    image: pgvector/pgvector:0.8.0-pg17
+    container_name: pgvector-hnsw
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=q1w2e3r4
+      - POSTGRES_DB=postgres
+    ports:
+      - "15433:5432"
+    volumes:
+      - pg-HNSW:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
+volumes:
+  elasticsearch:
+    driver: local
+  pg-IVFFlat:
+    driver: local
+  pg-HNSW:
+    driver: local
