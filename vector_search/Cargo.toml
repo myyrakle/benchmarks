@@ -10,6 +10,7 @@ sqlx = { version = "0.7", features = [ "runtime-tokio", "postgres" ] }
 anyhow = "1.0.92"
 half = "2.6.0"
 reqwest = "0.12.15"
+qdrant-client = "1.13.0"
 
 [[bin]]
 name = "main"
