@@ -33,6 +33,10 @@ name = "init_elasticsearch"
 path = "./src/init_elasticsearch.rs"
 
 [[bin]]
+name = "init_qdrant" 
+path = "./src/init_qdrant.rs"
+
+[[bin]]
 name = "bench_pg_ivfflat"
 path = "./src/bench_pg_ivfflat.rs"
 
