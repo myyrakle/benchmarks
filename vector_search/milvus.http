@@ -1,0 +1,57 @@
+@PORT = 19530
+@HOST = localhost
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/databases/create
+Content-Type: application/json
+
+{
+}
+###
+
+
+
+
+
+
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/databases/list
+Content-Type: application/json
+
+{
+}
+###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/list
+Content-Type: application/json
+
+{
+}
+###
+
