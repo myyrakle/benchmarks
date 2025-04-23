@@ -10,6 +10,7 @@ sqlx = { version = "0.7", features = [ "runtime-tokio", "postgres" ] }
 anyhow = "1.0.92"
 half = "2.6.0"
 reqwest = "0.12.15"
+qdrant-client = "1.13.0"
 
 [[bin]]
 name = "main"
@@ -32,6 +33,14 @@ name = "init_elasticsearch"
 path = "./src/init_elasticsearch.rs"
 
 [[bin]]
+name = "init_qdrant" 
+path = "./src/init_qdrant.rs"
+
+[[bin]]
+name = "init_milvus" 
+path = "./src/init_milvus.rs"
+
+[[bin]]
 name = "bench_pg_ivfflat"
 path = "./src/bench_pg_ivfflat.rs"
 
@@ -42,3 +51,7 @@ path = "./src/bench_pg_hnsw.rs"
 [[bin]]
 name = "bench_elasticsearch"
 path = "./src/bench_elasticsearch.rs"
+
+[[bin]]
+name = "bench_qdrant"
+path = "./src/bench_qdrant.rs"

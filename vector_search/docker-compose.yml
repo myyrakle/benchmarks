@@ -52,10 +52,26 @@ services:
           cpus: "1"
           memory: 8096M
 
+  qdrant:
+    image: qdrant/qdrant:v1.14.0
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
 volumes:
   elasticsearch:
     driver: local
   pg-IVFFlat:
     driver: local
   pg-HNSW:
+    driver: local
+  qdrant:
     driver: local
