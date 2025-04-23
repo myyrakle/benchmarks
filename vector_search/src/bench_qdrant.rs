@@ -33,7 +33,7 @@ async fn bench_single_thread(sample_count: usize) -> anyhow::Result<()> {
     let mut time_ms_max = 0;
 
     let http_client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(10))
+        .timeout(std::time::Duration::from_secs(20))
         .build()?;
 
     for vector in request_samples.iter() {
@@ -46,7 +46,7 @@ async fn bench_single_thread(sample_count: usize) -> anyhow::Result<()> {
             {{
                 "query": {vector},
                 "params": {{
-                    "hnsw_ef": 128,
+                    "hnsw_ef": 64,
                     "exact": false
                 }},
                 "limit": 10
