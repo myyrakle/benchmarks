@@ -12,7 +12,7 @@ async fn main() -> anyhow::Result<()> {
     println!("qdrant connection is alive!");
 
     // with single thread
-    bench_single_thread(100).await?;
+    // bench_single_thread(100).await?;
 
     // with 16 thread
     bench_multi_thread(16, 100).await?;
@@ -55,7 +55,7 @@ async fn bench_single_thread(sample_count: usize) -> anyhow::Result<()> {
         );
 
         let _result = http_client
-            .post(format!("{HOST}/vector_collection/points/query"))
+            .post(format!("{HOST}/collections/vector_collection/points/query"))
             .header("Content-Type", "application/json")
             .body(request_body)
             .send()
@@ -63,21 +63,21 @@ async fn bench_single_thread(sample_count: usize) -> anyhow::Result<()> {
 
         let elapsed_time_per_query = start_time_per_query.elapsed();
 
-        if elapsed_time_per_query.as_micros() < time_ms_min {
-            time_ms_min = elapsed_time_per_query.as_micros();
+        if elapsed_time_per_query.as_millis() < time_ms_min {
+            time_ms_min = elapsed_time_per_query.as_millis();
         }
 
-        if elapsed_time_per_query.as_micros() > time_ms_max {
-            time_ms_max = elapsed_time_per_query.as_micros();
+        if elapsed_time_per_query.as_millis() > time_ms_max {
+            time_ms_max = elapsed_time_per_query.as_millis();
         }
 
-        time_ms_total += elapsed_time_per_query.as_micros();
+        time_ms_total += elapsed_time_per_query.as_millis();
     }
 
     let time_ms_average = time_ms_total / sample_count as u128;
 
     println!(
-        "Average time: {} μs, Min time: {} μs, Max time: {} μs",
+        "Average time: {} ms, Min time: {} ms, Max time: {} ms",
         time_ms_average, time_ms_min, time_ms_max,
     );
 

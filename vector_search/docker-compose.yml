@@ -63,8 +63,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 8096M
+          cpus: "2"
+          memory: 16192M
 
 volumes:
   elasticsearch:
