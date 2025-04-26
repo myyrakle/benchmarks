@@ -2,7 +2,86 @@
 @HOST = localhost
 
 
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/create
+Content-Type: application/json
 
+{
+    "dbName": "default", 
+    "collectionName": "test_collection",
+    "dimension": 256
+}
+###
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/fields/alter_properties
+Content-Type: application/json
+
+{
+    "dbName": "default", 
+    "collectionName": "test_collection",
+    "fieldName": "category_id"
+}
+###
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/indexes/create
+Content-Type: application/json
+
+{
+    "dbName": "default", 
+    "collectionName": "test_collection",
+    "indexName": "idx_category_id",
+    "indexParams": [
+        {
+            "index_type": "INT64",
+            "fieldName": "category_id",
+            "indexName": "category_id"
+        }
+    ]
+}
+###
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/indexes/create
+Content-Type: application/json
+
+{
+    "dbName": "default", 
+    "collectionName": "test_collection",
+    "indexName": "idx_brand_name",
+    "indexParams": [
+        {
+            "index_type": "VARCHAR",
+            "fieldName": "brand_name",
+            "indexName": "brand_name"
+        }
+    ]
+}
+###
+
+
+
+
+### 
+GET http://{{HOST}}:{{PORT}}/_healthz
+Content-Type: application/json
+
+{
+}
+###
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/databases/list
+Content-Type: application/json
+
+{
+}
+###
 
 
 ### 
@@ -23,13 +102,158 @@ Content-Type: application/json
 
 
 
+
+
+
+
+
+
 ### 
-POST http://{{HOST}}:{{PORT}}/v2/vectordb/databases/list
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/list
 Content-Type: application/json
 
 {
+    "dbName": "test_db"
 }
 ###
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/describe
+Content-Type: application/json
+
+{
+    "dbName": "test_db", 
+    "collectionName": "test_collection"
+}
+###
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/entities/insert
+Content-Type: application/json
+
+{
+    "dbName": "test_db", 
+    "collectionName": "test_collection", 
+    "data": [
+        {
+            "id": 1, 
+            "vector": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.866], 
+            "color": "red"
+        },
+        {
+            "id": 2, 
+            "vector": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.10], 
+            "color": "blue"
+        }, 
+        {
+            "id": 3, 
+            "vector": [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 
+            "color": "green"
+        }, 
+        {
+            "id": 4, 
+            "vector": [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1], 
+            "color": "yellow"
+        }
+    ],
+    "filter": "color == 'red'"
+}
+###
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/entities/query
+Content-Type: application/json
+
+{
+    "dbName": "test_db", 
+    "collectionName": "test_collection", 
+    "filter": "color == 'red'"
+}
+###
+
+
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/entities/search
+Content-Type: application/json
+
+{
+    "dbName": "test_db", 
+    "collectionName": "test_collection", 
+    "data": [
+        [
+            0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.7
+        ]
+    ],
+    "filter": "color == 'red'"
+}
+###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/entities/get
+Content-Type: application/json
+
+{
+    "dbName": "test_db", 
+    "collectionName": "test_collection", 
+    "id": [1, 2]
+}
+###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

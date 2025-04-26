@@ -1,10 +1,5 @@
 use std::io::BufRead;
 
-use qdrant_client::Qdrant;
-use qdrant_client::qdrant::{
-    CreateCollectionBuilder, Distance, PointStruct, UpsertPointsBuilder, VectorParamsBuilder,
-};
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let brand_names = vec![
@@ -45,64 +40,77 @@ async fn main() -> anyhow::Result<()> {
         .timeout(std::time::Duration::from_secs(10))
         .build()?;
 
-    // client.health_check().await?;
-    // println!("Qdrant connection is alive!");
+    // Check if the Qdrant connection is alive
+    client
+        .post(format!("{}/v2/vectordb/databases/list", endpoint))
+        .send()
+        .await?;
 
-    // // Create the index
-    // client
-    //     .create_collection(
-    //         CreateCollectionBuilder::new("vector_collection")
-    //             .vectors_config(VectorParamsBuilder::new(256, Distance::Dot)),
-    //     )
-    //     .await?;
-    // println!("Index created!");
+    println!("Milvus connection is alive!");
 
-    // // Insert 10 million vectors
-    // let vectors_file = std::fs::File::open("vectors.txt")?;
+    // Create Collection
+    /*
+    ###
+    POST http://{{HOST}}:{{PORT}}/v2/vectordb/collections/create
+    Content-Type: application/json
 
-    // let reader = std::io::BufReader::new(vectors_file);
-    // let lines = reader.lines();
+    {
+        "dbName": "default",
+        "collectionName": "test_collection",
+        "dimension": 256
+    }
+    ###
+    */
 
-    // let start_time = std::time::Instant::now();
+    // Insert 10 million vectors
+    let vectors_file = std::fs::File::open("vectors.txt")?;
 
-    // let mut i = 0_i64;
-    // for line in lines {
-    //     i += 1;
-    //     if i % 1_000_000 == 0 {
-    //         println!("Inserted {} vectors...", i);
-    //     }
+    let reader = std::io::BufReader::new(vectors_file);
+    let lines = reader.lines();
 
-    //     let line = line?;
+    let start_time = std::time::Instant::now();
 
-    //     let vectors = line
-    //         .split(',')
-    //         .map(|s| s.parse::<f32>().unwrap())
-    //         .collect::<Vec<_>>();
+    let mut i = 0_i64;
+    for line in lines {
+        i += 1;
+        if i % 1_000_000 == 0 {
+            println!("Inserted {} vectors...", i);
+        }
 
-    //     let points: Vec<PointStruct> = vec![PointStruct::new(
-    //         i as u64,
-    //         vectors,
-    //         [
-    //             (
-    //                 "brand_name",
-    //                 brand_names[i as usize % brand_names.len()].into(),
-    //             ),
-    //             (
-    //                 "category_id",
-    //                 category_ids[i as usize % category_ids.len()].into(),
-    //             ),
-    //         ],
-    //     )];
+        let line = line?;
 
-    //     // Insert the vector into the index
-    //     client
-    //         .upsert_points(UpsertPointsBuilder::new("vector_collection", points).wait(true))
-    //         .await?;
-    // }
-    // println!("Inserted 10 million vectors into vector_collection!");
+        let brand_name = brand_names[i as usize % brand_names.len()];
+        let category_id = category_ids[i as usize % category_ids.len()];
 
-    // let elapsed_time = start_time.elapsed();
-    // println!("Elapsed time: {} seconds", elapsed_time.as_secs());
+        let request_body = format!(
+            r#"
+            {{
+                "dbName": "default", 
+                "collectionName": "test_collection", 
+                "data": [
+                    {{
+                        "id": {i}, 
+                        "vector": [{line}],
+                        "brand_name": "{brand_name}",
+                        "category_id": {category_id}
+                    }}
+                ]
+            }}
+            "#,
+        );
+
+        // Insert the vector into the collection
+        client
+            .post(format!("{}/v2/vectordb/entities/insert", endpoint))
+            .header("Content-Type", "application/json")
+            .body(request_body)
+            .send()
+            .await?;
+    }
+    println!("Inserted 10 million vectors into vector_collection!");
+
+    let elapsed_time = start_time.elapsed();
+    println!("Elapsed time: {} seconds", elapsed_time.as_secs());
 
     Ok(())
 }
