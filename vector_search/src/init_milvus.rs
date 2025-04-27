@@ -73,6 +73,7 @@ async fn main() -> anyhow::Result<()> {
     let mut i = 0_i64;
     for line in lines {
         i += 1;
+
         if i % 1_000_000 == 0 {
             println!("Inserted {} vectors...", i);
         }

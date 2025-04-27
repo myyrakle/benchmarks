@@ -25,6 +25,18 @@ Content-Type: application/json
 ###
 
 
+### 
+POST http://{{HOST}}:{{PORT}}/v2/vectordb/entities/query
+Content-Type: application/json
+
+{
+    "dbName": "default", 
+    "collectionName": "test_collection", 
+    "limit": 5,
+    "filter": "category_id == 1 AND brand_name == 'Prada'"
+}
+###
+
 
 ### 
 POST http://{{HOST}}:{{PORT}}/v2/vectordb/indexes/create
@@ -36,7 +48,7 @@ Content-Type: application/json
     "indexName": "idx_category_id",
     "indexParams": [
         {
-            "index_type": "INT64",
+            "index_type": "AUTOINDEX",
             "fieldName": "category_id",
             "indexName": "category_id"
         }
