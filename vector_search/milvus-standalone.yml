@@ -17,6 +17,11 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   minio:
     container_name: milvus-minio
@@ -35,6 +40,11 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
 
   standalone:
     container_name: milvus-standalone
@@ -62,8 +72,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 8096M
+          cpus: "4"
+          memory: 32364M
 
 networks:
   default:
