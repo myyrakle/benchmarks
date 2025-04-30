@@ -1,0 +1,75 @@
+@HOST = localhost:6333
+
+###
+PUT http://{{HOST}}/collections/vector_collection
+Content-Type: application/json
+
+{
+    "vectors": {
+      "size": 256,
+      "distance": "Dot"
+    },
+    "init_from": {
+       "collection": "vector_collection_v2"
+    }
+}
+###
+
+
+###
+PUT http://{{HOST}}/collections/vector_collection_v2
+Content-Type: application/json
+
+{
+    "vectors": {
+      "size": 256,
+      "distance": "Dot"
+    },
+    "quantization_config": {
+        "scalar": {
+            "type": "int8",
+            "quantile": 0.99
+        }
+    },
+    "init_from": {
+       "collection": "vector_collection"
+    }
+}
+###
+
+
+###
+PATCH http://{{HOST}}/collections/vector_collection_v2
+Content-Type: application/json
+
+{
+    "quantization_config": {
+        "scalar": {
+            "type": "int8",
+            "quantile": 0.99, 
+            "always_ram": false
+        }
+    }
+}
+###
+
+
+###
+DELETE http://{{HOST}}/collections/vector_collection
+Content-Type: application/json
+
+{
+}
+###
+
+
+
+###
+POST http://{{HOST}}/collections/vector_collection_v2/points/count
+Content-Type: application/json
+
+{
+}
+###
+
+

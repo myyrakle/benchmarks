@@ -60,6 +60,8 @@ services:
       - "6334:6334"
     volumes:
       - qdrant:/qdrant/storage
+    ulimits:
+      nofile: 65535
     deploy:
       resources:
         limits:

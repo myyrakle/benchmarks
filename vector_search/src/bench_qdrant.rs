@@ -55,7 +55,9 @@ async fn bench_single_thread(sample_count: usize) -> anyhow::Result<()> {
         );
 
         let _result = http_client
-            .post(format!("{HOST}/collections/vector_collection/points/query"))
+            .post(format!(
+                "{HOST}/collections/vector_collection_v2/points/query"
+            ))
             .header("Content-Type", "application/json")
             .body(request_body)
             .send()
