@@ -12,7 +12,8 @@
 1. pgvector(IVFFlat)
 2. pgvector(HNSW)
 3. Elasticsearch
-4. Milvus (Not Yet)
+4. Milvus
+5. Qdrant
 
 ## Setup
 
