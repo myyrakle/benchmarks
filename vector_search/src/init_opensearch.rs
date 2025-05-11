@@ -20,14 +20,15 @@ async fn main() -> anyhow::Result<()> {
         .body(
             r#"
             {
-                "settings": {},
+                "settings": {
+                    "index.knn": true
+                },
                 "mappings": {
                     "properties": {
                         "vector": {
                             "type": "knn_vector",
                             "dimension": 256,
                             "space_type": "innerproduct",
-                            "space_type": "l2",
                             "mode": "on_disk",
                             "method": {
                                 "name": "hnsw"
@@ -35,7 +36,7 @@ async fn main() -> anyhow::Result<()> {
                         }
                     }
                 }
-            }    
+            }  
         "#,
         )
         .send()

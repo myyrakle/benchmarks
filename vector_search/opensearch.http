@@ -38,6 +38,14 @@ Content-Type: application/json
 ###
 
 ### 
+DELETE http://{{HOST}}:{{PORT}}/vector_index
+Content-Type: application/json
+
+{
+}
+###
+
+### 
 PUT http://{{HOST}}:{{PORT}}/vector_index
 Content-Type: application/json
 
@@ -46,14 +54,17 @@ Content-Type: application/json
     "mappings": {
         "properties": {
             "vector": {
-                "type": "dense_vector",
-                "dims": 256,
-                "index": true,
-                "similarity": "dot_product"
+                "type": "knn_vector",
+                "dimension": 256,
+                "space_type": "innerproduct",
+                "mode": "on_disk",
+                "method": {
+                    "name": "hnsw"
+                } 
             }
         }
     }
-}
+}  
 ###
 
 ### 
