@@ -17,15 +17,15 @@ services:
         limits:
           cpus: "1"
           memory: 8096M
-  
+
   opensearch:
     image: opensearchproject/opensearch:3.0.0
     container_name: opensearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - xpack.security.transport.ssl.enabled=false
+      - plugins.security.disabled=true
+      - plugins.security.ssl.http.enabled=false
+      - plugins.security.ssl.transport.enabled=false
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ForBenchmark1234!
     volumes:
       - opensearch:/usr/share/opensearch/data
