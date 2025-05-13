@@ -57,6 +57,10 @@ name = "bench_elasticsearch"
 path = "./src/bench_elasticsearch.rs"
 
 [[bin]]
+name = "bench_opensearch"
+path = "./src/bench_opensearch.rs"
+
+[[bin]]
 name = "bench_qdrant"
 path = "./src/bench_qdrant.rs"
 
