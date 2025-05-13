@@ -18,6 +18,25 @@ services:
           cpus: "1"
           memory: 8096M
 
+  opensearch:
+    image: opensearchproject/opensearch:3.0.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - plugins.security.ssl.http.enabled=false
+      - plugins.security.ssl.transport.enabled=false
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ForBenchmark1234!
+    volumes:
+      - opensearch:/usr/share/opensearch/data
+    ports:
+      - "9201:9200"
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 8096M
+
   pgvector-IVFFlat:
     image: pgvector/pgvector:0.8.0-pg17
     container_name: pgvector-ivfflat
@@ -70,6 +89,8 @@ services:
 
 volumes:
   elasticsearch:
+    driver: local
+  opensearch:
     driver: local
   pg-IVFFlat:
     driver: local
