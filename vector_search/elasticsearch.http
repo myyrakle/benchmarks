@@ -61,6 +61,10 @@ GET http://{{HOST}}:{{PORT}}/vector_index
 ###
 
 ### 
+GET http://{{HOST}}:{{PORT}}/vector_index/_count
+###
+
+### 
 PUT http://{{HOST}}:{{PORT}}/vector_index/_bulk
 Content-Type: application/x-ndjson
 

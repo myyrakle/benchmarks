@@ -115,6 +115,9 @@ Content-Type: application/json
 }
 ###
 
+### 
+GET http://{{HOST}}:{{PORT}}/vector_index/_count
+###
 
 
 
