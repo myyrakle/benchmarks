@@ -1,0 +1,30 @@
+### Change Image Format
+POST http://localhost:8080/change-image-format
+Content-Type: application/json
+
+{
+  "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+  "format": "jpg"
+}
+### 
+
+### Resize Image
+POST http://localhost:8080/resize-image
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "max_width": 400,
+    "max_height": 600
+}
+###
+
+### Rotate Image
+POST http://localhost:8080/rotate-image
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "angle": 90
+}
+###
