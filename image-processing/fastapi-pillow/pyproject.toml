@@ -1,0 +1,13 @@
+[project]
+name = "fastapi-pillow"
+version = "0.1.0"
+description = "Image processing server using FastAPI and Pillow"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "gunicorn>=21.2.0",
+    "pillow>=10.0.0",
+    "httpx>=0.25.0",
+]

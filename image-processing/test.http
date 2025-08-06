@@ -1,0 +1,43 @@
+@HOST = http://localhost:8082
+
+### Change Image Format
+POST {{HOST}}/change-image-format
+Content-Type: application/json
+
+{
+  "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+  "format": "jpg"
+}
+### 
+
+### Resize Image
+POST {{HOST}}/resize-image
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "max_width": 400,
+    "max_height": 600
+}
+###
+
+### Rotate Image
+POST {{HOST}}/rotate-image
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "angle": 90
+}
+###
+
+### Watermark Image
+POST {{HOST}}/add-watermark
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "watermark_text": "Sample Watermark",
+    "position": "bottom-right"
+}
+###
