@@ -10,5 +10,4 @@ dependencies = [
     "gunicorn>=21.2.0",
     "pillow>=10.0.0",
     "httpx>=0.25.0",
-    "python-multipart>=0.0.6"
 ]
