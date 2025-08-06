@@ -10,3 +10,8 @@ services:
         limits:
           cpus: 2
           memory: 4G
+  golang-std:
+    build: ./golang-std
+    ports:
+      - "8082:8080"
+    restart: unless-stopped
