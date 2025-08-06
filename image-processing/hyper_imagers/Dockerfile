@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.75-slim as builder
+FROM rust:1.88-slim as builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -20,11 +20,10 @@ RUN mkdir src && \
     rm -rf src
 
 # 소스 코드 복사
-COPY src ./src
+COPY . .
 
 # 실제 애플리케이션 빌드
-RUN touch src/main.rs && \
-    cargo build --release
+RUN cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -43,10 +42,6 @@ COPY --from=builder /app/target/release/hyper_imagers .
 
 # 포트 노출
 EXPOSE 8080
-
-# 헬스체크 추가
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/ || exit 1
 
 # 서버 실행
 CMD ["./hyper_imagers"]

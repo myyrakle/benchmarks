@@ -34,3 +34,15 @@ services:
         limits:
           cpus: 2
           memory: 4G
+  hyper-imagers:
+    build: ./hyper_imagers
+    ports:
+      - "8084:8080"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: 4G
