@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"image/color"
+	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
@@ -15,6 +17,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"golang.org/x/image/bmp"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 	"golang.org/x/image/tiff"
 )
 
@@ -33,6 +38,14 @@ type ResizeImageRequest struct {
 	ImageURL  string `json:"image_url"`
 	MaxWidth  int    `json:"max_width"`
 	MaxHeight int    `json:"max_height"`
+}
+
+type WatermarkRequest struct {
+	ImageURL      string  `json:"image_url"`
+	WatermarkText string  `json:"watermark_text"`
+	Position      string  `json:"position"`
+	FontSize      int     `json:"font_size"`
+	Opacity       float64 `json:"opacity"`
 }
 
 // Response 구조체
@@ -154,6 +167,69 @@ func rotate270(img image.Image) image.Image {
 	}
 
 	return newImg
+}
+
+// 워터마크 추가 함수
+func addWatermark(img image.Image, text string, position string, fontSize int, opacity float64) image.Image {
+	bounds := img.Bounds()
+
+	// RGBA 이미지로 변환
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+
+	// 워터마크 텍스트 그리기
+	alpha := uint8(255 * opacity)
+	c := color.RGBA{255, 255, 255, alpha}
+
+	// 텍스트 크기 계산 (대략적)
+	face := basicfont.Face7x13
+	textWidth := len(text) * 7
+	textHeight := 13
+
+	var x, y int
+	switch position {
+	case "top-left":
+		x, y = 20, 20+textHeight
+	case "top-right":
+		x, y = bounds.Dx()-textWidth-20, 20+textHeight
+	case "bottom-left":
+		x, y = 20, bounds.Dy()-20
+	case "bottom-right":
+		x, y = bounds.Dx()-textWidth-20, bounds.Dy()-20
+	case "center":
+		x, y = (bounds.Dx()-textWidth)/2, (bounds.Dy()+textHeight)/2
+	default:
+		x, y = bounds.Dx()-textWidth-20, bounds.Dy()-20
+	}
+
+	// 검은색 테두리 추가 (가독성 향상)
+	shadowColor := color.RGBA{0, 0, 0, alpha / 2}
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+			if dx != 0 || dy != 0 {
+				point := fixed.Point26_6{X: fixed.Int26_6((x + dx) * 64), Y: fixed.Int26_6((y + dy) * 64)}
+				d := &font.Drawer{
+					Dst:  rgba,
+					Src:  image.NewUniform(shadowColor),
+					Face: face,
+					Dot:  point,
+				}
+				d.DrawString(text)
+			}
+		}
+	}
+
+	// 흰색 텍스트 그리기
+	point := fixed.Point26_6{X: fixed.Int26_6(x * 64), Y: fixed.Int26_6(y * 64)}
+	d := &font.Drawer{
+		Dst:  rgba,
+		Src:  image.NewUniform(c),
+		Face: face,
+		Dot:  point,
+	}
+	d.DrawString(text)
+
+	return rgba
 }
 
 // 이미지 리사이즈 함수 (비율 유지)
@@ -363,6 +439,68 @@ func resizeImageHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func addWatermarkHandler(w http.ResponseWriter, r *http.Request) {
+	var req WatermarkRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// 기본값 설정
+	if req.FontSize == 0 {
+		req.FontSize = 36
+	}
+	if req.Opacity == 0 {
+		req.Opacity = 0.7
+	}
+	if req.Position == "" {
+		req.Position = "bottom-right"
+	}
+
+	// 이미지 다운로드
+	img, _, err := downloadImage(req.ImageURL)
+	if err != nil {
+		response := ImageResponse{
+			Success: false,
+			Message: err.Error(),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	bounds := img.Bounds()
+	originalSize := [2]int{bounds.Dx(), bounds.Dy()}
+
+	// 워터마크 추가
+	watermarkedImg := addWatermark(img, req.WatermarkText, req.Position, req.FontSize, req.Opacity)
+
+	// JPEG로 인코딩
+	imageData, err := imageToBase64(watermarkedImg, "jpeg")
+	if err != nil {
+		response := ImageResponse{
+			Success: false,
+			Message: err.Error(),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response := ImageResponse{
+		Success:      true,
+		Message:      "Successfully added watermark to image",
+		ImageData:    &imageData,
+		OriginalSize: &originalSize,
+		NewSize:      &originalSize,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func main() {
 	r := mux.NewRouter()
 
@@ -371,6 +509,7 @@ func main() {
 	r.HandleFunc("/change-image-format", changeImageFormatHandler).Methods("POST")
 	r.HandleFunc("/rotate-image", rotateImageHandler).Methods("POST")
 	r.HandleFunc("/resize-image", resizeImageHandler).Methods("POST")
+	r.HandleFunc("/add-watermark", addWatermarkHandler).Methods("POST")
 
 	// 서버 시작
 	port := "8080"

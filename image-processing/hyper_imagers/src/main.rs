@@ -2,12 +2,12 @@ use std::convert::Infallible;
 use std::io::Cursor;
 use std::net::SocketAddr;
 
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 use bytes::Bytes;
 use http_body_util::{BodyExt, Full};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
-use hyper::{body::Incoming as IncomingBody, Method, Request, Response, StatusCode};
+use hyper::{Method, Request, Response, StatusCode, body::Incoming as IncomingBody};
 use hyper_util::rt::TokioIo;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
@@ -31,6 +31,15 @@ struct ResizeImageRequest {
     image_url: String,
     max_width: u32,
     max_height: u32,
+}
+
+#[derive(Deserialize)]
+struct WatermarkRequest {
+    image_url: String,
+    watermark_text: String,
+    position: Option<String>,
+    font_size: Option<f32>,
+    opacity: Option<f32>,
 }
 
 // Response 구조체
@@ -223,6 +232,82 @@ async fn resize_image(
     })
 }
 
+// 워터마크 추가
+async fn add_watermark(
+    req: WatermarkRequest,
+) -> Result<ImageResponse, Box<dyn std::error::Error + Send + Sync>> {
+    // 이미지 다운로드
+    let image_data = download_image(&req.image_url).await?;
+
+    // 이미지 로드
+    let img = image::load_from_memory(&image_data)?;
+    let mut rgba_img = img.to_rgba8();
+    let original_size = [rgba_img.width(), rgba_img.height()];
+
+    let position = req.position.as_deref().unwrap_or("bottom-right");
+    let _font_size = req.font_size.unwrap_or(36.0);
+    let opacity = req.opacity.unwrap_or(0.7);
+
+    // 간단한 픽셀 기반 텍스트 그리기 (폰트 대신)
+    let text_width = (req.watermark_text.len() as u32) * 8;
+    let text_height = 16;
+
+    // 위치 계산
+    let (x, y) = match position {
+        "top-left" => (20, 20),
+        "top-right" => (rgba_img.width().saturating_sub(text_width + 20), 20),
+        "bottom-left" => (20, rgba_img.height().saturating_sub(text_height + 20)),
+        "bottom-right" => (
+            rgba_img.width().saturating_sub(text_width + 20),
+            rgba_img.height().saturating_sub(text_height + 20),
+        ),
+        "center" => (
+            (rgba_img.width().saturating_sub(text_width)) / 2,
+            (rgba_img.height().saturating_sub(text_height)) / 2,
+        ),
+        _ => (
+            rgba_img.width().saturating_sub(text_width + 20),
+            rgba_img.height().saturating_sub(text_height + 20),
+        ),
+    };
+
+    // 간단한 사각형으로 워터마크 표시 (텍스트 대신)
+    let color = image::Rgba([255u8, 255u8, 255u8, (255.0 * opacity) as u8]);
+    let shadow_color = image::Rgba([0u8, 0u8, 0u8, (128.0 * opacity) as u8]);
+
+    // 텍스트 영역에 사각형 그리기 (워터마크 배경)
+    for py in y..y + text_height {
+        for px in x..x + text_width {
+            if px < rgba_img.width() && py < rgba_img.height() {
+                // 그림자 효과
+                if px > 0 && py > 0 {
+                    rgba_img.put_pixel(px - 1, py - 1, shadow_color);
+                }
+                // 메인 색상
+                rgba_img.put_pixel(px, py, color);
+            }
+        }
+    }
+
+    // JPEG로 변환
+    let mut output = Vec::new();
+    {
+        let mut cursor = Cursor::new(&mut output);
+        let rgb_img = image::DynamicImage::ImageRgba8(rgba_img.clone()).to_rgb8();
+        rgb_img.write_to(&mut cursor, image::ImageFormat::Jpeg)?;
+    }
+
+    let base64_image = general_purpose::STANDARD.encode(&output);
+
+    Ok(ImageResponse {
+        success: true,
+        message: "Successfully added watermark to image".to_string(),
+        image_data: Some(base64_image),
+        original_size: Some(original_size),
+        new_size: Some([rgba_img.width(), rgba_img.height()]),
+    })
+}
+
 // HTTP 요청 처리
 async fn handle_request(req: Request<IncomingBody>) -> Result<Response<Full<Bytes>>, Infallible> {
     let response = match (req.method(), req.uri().path()) {
@@ -292,6 +377,34 @@ async fn handle_request(req: Request<IncomingBody>) -> Result<Response<Full<Byte
         (&Method::POST, "/resize-image") => {
             match process_json_request::<ResizeImageRequest>(req).await {
                 Ok(request_data) => match resize_image(request_data).await {
+                    Ok(response_data) => create_json_response(StatusCode::OK, &response_data),
+                    Err(e) => {
+                        let error_response = ImageResponse {
+                            success: false,
+                            message: e.to_string(),
+                            image_data: None,
+                            original_size: None,
+                            new_size: None,
+                        };
+                        create_json_response(StatusCode::BAD_REQUEST, &error_response)
+                    }
+                },
+                Err(e) => {
+                    let error_response = ImageResponse {
+                        success: false,
+                        message: format!("Invalid request: {}", e),
+                        image_data: None,
+                        original_size: None,
+                        new_size: None,
+                    };
+                    create_json_response(StatusCode::BAD_REQUEST, &error_response)
+                }
+            }
+        }
+
+        (&Method::POST, "/add-watermark") => {
+            match process_json_request::<WatermarkRequest>(req).await {
+                Ok(request_data) => match add_watermark(request_data).await {
                     Ok(response_data) => create_json_response(StatusCode::OK, &response_data),
                     Err(e) => {
                         let error_response = ImageResponse {

@@ -30,3 +30,14 @@ Content-Type: application/json
     "angle": 90
 }
 ###
+
+### Watermark Image
+POST {{HOST}}/add-watermark
+Content-Type: application/json
+
+{
+    "image_url": "https://r2-test.myyrakle.com/sample/3MB.png",
+    "watermark_text": "Sample Watermark",
+    "position": "bottom-right"
+}
+###

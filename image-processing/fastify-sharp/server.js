@@ -276,6 +276,100 @@ fastify.post('/resize-image', {
   }
 });
 
+const watermarkSchema = {
+  body: {
+    type: 'object',
+    required: ['image_url', 'watermark_text'],
+    properties: {
+      image_url: { type: 'string' },
+      watermark_text: { type: 'string' },
+      position: { type: 'string', default: 'bottom-right' },
+      font_size: { type: 'number', default: 36 },
+      opacity: { type: 'number', default: 0.7, minimum: 0, maximum: 1 }
+    }
+  }
+};
+
+// 워터마크 추가 엔드포인트
+fastify.post('/add-watermark', {
+  schema: {
+    body: watermarkSchema.body,
+    response: {
+      200: imageResponseSchema
+    }
+  }
+}, async (request, reply) => {
+  try {
+    const { image_url, watermark_text, position = 'bottom-right', font_size = 36, opacity = 0.7 } = request.body;
+
+    // 이미지 다운로드
+    const imageBuffer = await downloadImage(image_url);
+
+    // 이미지 정보 가져오기
+    const metadata = await sharp(imageBuffer).metadata();
+    
+    // 워터마크 위치 계산
+    const textWidth = watermark_text.length * font_size * 0.6; // 대략적인 계산
+    const textHeight = font_size;
+    
+    const positions = {
+      'top-left': { left: 20, top: 20 + textHeight },
+      'top-right': { left: Math.max(20, metadata.width - textWidth - 20), top: 20 + textHeight },
+      'bottom-left': { left: 20, top: metadata.height - 20 },
+      'bottom-right': { left: Math.max(20, metadata.width - textWidth - 20), top: metadata.height - 20 },
+      'center': { left: Math.max(0, (metadata.width - textWidth) / 2), top: Math.max(0, (metadata.height + textHeight) / 2) }
+    };
+
+    const pos = positions[position] || positions['bottom-right'];
+
+    // SVG 워터마크 생성
+    const svgWatermark = `
+      <svg width="${metadata.width}" height="${metadata.height}">
+        <defs>
+          <filter id="shadow">
+            <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="black" flood-opacity="0.5"/>
+          </filter>
+        </defs>
+        <text x="${pos.left}" y="${pos.top}" 
+              font-family="Arial, sans-serif" 
+              font-size="${font_size}" 
+              font-weight="bold"
+              fill="white" 
+              fill-opacity="${opacity}"
+              filter="url(#shadow)">
+          ${watermark_text}
+        </text>
+      </svg>
+    `;
+
+    // 워터마크가 적용된 이미지 생성
+    const processedImage = await sharp(imageBuffer)
+      .composite([{
+        input: Buffer.from(svgWatermark),
+        blend: 'over'
+      }])
+      .jpeg({ quality: 85 })
+      .toBuffer();
+
+    const base64Image = processedImage.toString('base64');
+
+    return {
+      success: true,
+      message: 'Successfully added watermark to image',
+      image_data: base64Image,
+      original_size: [metadata.width, metadata.height],
+      new_size: [metadata.width, metadata.height]
+    };
+
+  } catch (error) {
+    reply.code(400);
+    return {
+      success: false,
+      message: error.message
+    };
+  }
+});
+
 // 서버 시작
 const start = async () => {
   try {
