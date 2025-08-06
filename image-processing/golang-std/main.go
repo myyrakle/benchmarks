@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -12,9 +13,14 @@ import (
 	"image/jpeg"
 	"image/png"
 	"log"
+	"math"
+	"net"
 	"net/http"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/anthonynsimon/bild/transform"
 	"github.com/gorilla/mux"
 	"golang.org/x/image/bmp"
 	"golang.org/x/image/font"
@@ -501,6 +507,152 @@ func addWatermarkHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func drawSomethingHandler(w http.ResponseWriter, r *http.Request) {
+	var req DrawSomethingRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	buf, err := drawSomething(ctx, req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error drawing something: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write(buf.Bytes()); err != nil {
+		log.Printf("Error writing response: %v", err)
+	}
+
+	log.Printf("Successfully drew something with aspect ratio %.2f", req.AspectRatio)
+	if len(req.DrawSomething) == 0 {
+		log.Println("No outfit contents provided")
+		return
+	}
+}
+
+type SomethingLocation struct {
+	Angle     float32 `json:"angle"`
+	Flip      bool    `json:"flip"`
+	PositionX float32 `json:"positionX"`
+	PositionY float32 `json:"positionY"`
+	PositionZ int     `json:"positionZ"`
+	Scale     float32 `json:"scale"`
+}
+
+type DrawSomething struct {
+	SomethingLocation
+	ImageUrl string
+}
+
+type DrawSomethingRequest struct {
+	AspectRatio   float32         `json:"aspectRatio"`
+	DrawSomething []DrawSomething `json:"drawSomething"`
+}
+
+const (
+	GridHD       = 1440
+	GridFullSize = 720
+)
+
+func HttpGetResp(ctx context.Context, url string) (*http.Response, error) {
+	var (
+		request *http.Request
+		resp    *http.Response
+		err     error
+	)
+
+	request, err = http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36")
+	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
+
+	client := &http.Client{Transport: &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          1000,
+		MaxConnsPerHost:       1000,
+		MaxIdleConnsPerHost:   1000,
+		IdleConnTimeout:       30 * time.Minute,
+		TLSHandshakeTimeout:   15 * time.Second,
+		ExpectContinueTimeout: 10 * time.Second,
+	}}
+
+	resp, err = client.Do(request)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, err
+}
+
+func drawSomething(ctx context.Context, request DrawSomethingRequest) (bytes.Buffer, error) {
+	sort.Slice(request.DrawSomething, func(i, j int) bool {
+		return request.DrawSomething[i].PositionZ < request.DrawSomething[j].PositionZ
+	})
+
+	var buf bytes.Buffer
+
+	canvasWidth := int(float32(GridHD) * request.AspectRatio)
+	r := image.Rectangle{
+		Min: image.Point{},
+		Max: image.Point{X: canvasWidth, Y: GridHD},
+	}
+	canvas := image.NewRGBA(r)
+	draw.Draw(canvas, canvas.Bounds(), &image.Uniform{C: color.White}, image.Point{}, draw.Src)
+
+	for _, content := range request.DrawSomething {
+		var (
+			response *http.Response
+			img      image.Image
+			err      error
+		)
+
+		response, err = HttpGetResp(ctx, content.ImageUrl)
+		if err != nil {
+			return buf, err
+		}
+		img, _, err = image.Decode(response.Body)
+		if err != nil {
+			return buf, err
+		}
+		response.Body.Close()
+
+		ratio := float32(img.Bounds().Size().Y) / float32(img.Bounds().Size().X)
+		contentWidth := int(float32(canvasWidth) * (content.Scale))
+		contentHeight := int(float32(canvasWidth) * (content.Scale * ratio))
+
+		newImg := transform.Resize(img, contentWidth, contentHeight, transform.Linear)
+		if content.Flip {
+			newImg = transform.FlipH(newImg)
+		}
+		if content.Angle != 0 {
+			newImg = transform.Rotate(newImg, float64(-content.Angle*180/math.Pi), &transform.RotationOptions{ResizeBounds: true})
+		}
+
+		contentImg := image.Rectangle{
+			Min: image.Point{X: int(content.PositionX*float32(canvasWidth)) - newImg.Bounds().Size().X/2, Y: int(content.PositionY*GridHD) - newImg.Bounds().Size().Y/2},
+			Max: image.Point{X: int(content.PositionX*float32(canvasWidth)) + newImg.Bounds().Size().X/2, Y: int(content.PositionY*GridHD) + newImg.Bounds().Size().Y/2},
+		}
+		draw.Draw(canvas, contentImg, newImg, image.Point{}, draw.Over)
+	}
+
+	if err := jpeg.Encode(&buf, canvas, &jpeg.Options{Quality: 100}); err != nil {
+		return buf, err
+	}
+	return buf, nil
+}
+
 func main() {
 	r := mux.NewRouter()
 
@@ -510,6 +662,7 @@ func main() {
 	r.HandleFunc("/rotate-image", rotateImageHandler).Methods("POST")
 	r.HandleFunc("/resize-image", resizeImageHandler).Methods("POST")
 	r.HandleFunc("/add-watermark", addWatermarkHandler).Methods("POST")
+	r.HandleFunc("/draw-something", drawSomethingHandler).Methods("POST")
 
 	// 서버 시작
 	port := "8080"
