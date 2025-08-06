@@ -1,5 +1,7 @@
+@HOST = http://localhost:8081
+
 ### Change Image Format
-POST http://localhost:8080/change-image-format
+POST {{HOST}}/change-image-format
 Content-Type: application/json
 
 {
@@ -9,7 +11,7 @@ Content-Type: application/json
 ### 
 
 ### Resize Image
-POST http://localhost:8080/resize-image
+POST {{HOST}}/resize-image
 Content-Type: application/json
 
 {
@@ -20,7 +22,7 @@ Content-Type: application/json
 ###
 
 ### Rotate Image
-POST http://localhost:8080/rotate-image
+POST {{HOST}}/rotate-image
 Content-Type: application/json
 
 {
