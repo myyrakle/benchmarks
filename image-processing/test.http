@@ -1,4 +1,4 @@
-@HOST = http://localhost:8081
+@HOST = http://localhost:8082
 
 ### Change Image Format
 POST {{HOST}}/change-image-format

@@ -8,8 +8,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 4G
+          cpus: 4
+          memory: 8G
   golang-std:
     build: ./golang-std
     ports:
@@ -18,8 +18,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 4G
+          cpus: 4
+          memory: 8G
   fastify-sharp:
     build: ./fastify-sharp
     ports:
@@ -32,8 +32,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 4G
+          cpus: 4
+          memory: 8G
   hyper-imagers:
     build: ./hyper_imagers
     ports:
@@ -44,5 +44,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 2
-          memory: 4G
+          cpus: 4
+          memory: 8G

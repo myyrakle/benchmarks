@@ -20,7 +20,7 @@ clothes_image_urls = [
 ]
 
 
-HOST = "http://localhost:8080"
+HOST = "http://localhost:8084"
 
 
 class ProcessImage(HttpUser):
@@ -29,7 +29,7 @@ class ProcessImage(HttpUser):
     @task
     def png_to_jpg(self):
         request_body = {
-            "image_url": image_urls[1],  # 3MB 이미지 URL
+            "image_url": image_urls[0],  # 3MB 이미지 URL
             "format": "jpg",  # 변환할 이미지 포맷
         }
 
@@ -42,8 +42,8 @@ class ProcessImage(HttpUser):
         ) as response:
             if response.status_code == 200:
                 try:
-                    result = response.json()
-                    print(f"Create clothes response: {result}")
+                    # result = response.json()
+                    # print(f"Create clothes response: {result}")
                     response.success()
                 except Exception as e:
                     print(f"JSON parsing error: {e}")
@@ -56,7 +56,7 @@ class ProcessImage(HttpUser):
     @task
     def rotation(self):
         request_body = {
-            "image_url": image_urls[1],  # 10MB 이미지 URL
+            "image_url": image_urls[0],  # 10MB 이미지 URL
             "angle": 90,  # 회전 각도
         }
 
@@ -69,8 +69,8 @@ class ProcessImage(HttpUser):
         ) as response:
             if response.status_code == 200:
                 try:
-                    result = response.json()
-                    print(f"Rotation response: {result}")
+                    # result = response.json()
+                    # print(f"Rotation response: {result}")
                     response.success()
                 except Exception as e:
                     print(f"JSON parsing error: {e}")
@@ -83,7 +83,7 @@ class ProcessImage(HttpUser):
     @task
     def resize(self):
         request_body = {
-            "image_url": image_urls[1],  # 400x300 이미지 URL
+            "image_url": image_urls[0],  # 400x300 이미지 URL
             "max_width": 200,  # 최대 너비
             "max_height": 200,  # 최대 높이
         }
@@ -97,8 +97,36 @@ class ProcessImage(HttpUser):
         ) as response:
             if response.status_code == 200:
                 try:
-                    result = response.json()
-                    print(f"Resize response: {result}")
+                    # result = response.json()
+                    # print(f"Resize response: {result}")
+                    response.success()
+                except Exception as e:
+                    print(f"JSON parsing error: {e}")
+                    print(f"Response text: {response.text}")
+                    response.failure(f"JSON parsing failed: {e}")
+            else:
+                print(f"HTTP error {response.status_code}: {response.text}")
+                response.failure(f"HTTP {response.status_code}")
+
+    @task
+    def watermark(self):
+        request_body = {
+            "image_url": image_urls[0],  # 옷 이미지 URL
+            "watermark_text": "Sample Watermark",  # 워터마크 텍스트
+            "position": "bottom-right",  # 워터마크 위치
+        }
+
+        with self.client.post(
+            "/add-watermark",
+            json=request_body,
+            name="watermark",
+            catch_response=True,
+            timeout=10,  # 10초 타임아웃 설정
+        ) as response:
+            if response.status_code == 200:
+                try:
+                    # result = response.json()
+                    # print(f"Watermark response: {result}")
                     response.success()
                 except Exception as e:
                     print(f"JSON parsing error: {e}")
