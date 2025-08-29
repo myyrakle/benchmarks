@@ -10,8 +10,24 @@ struct WriteEntry {
 
 #[tokio::main]
 async fn main() {
-    let db = db::FakeDB::new();
+    // parse args
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() != 2 {
+        eprintln!("Usage: {} <db_type>", args[0]);
+        eprintln!("db_type: postgres, fake");
+        std::process::exit(1);
+    }
+
+    let db_arg = &args[1];
+    println!("Using database: {}", db_arg);
+
+    let db = db::new_database(db_arg)
+        .await
+        .expect("Failed to create database");
+
     db.ping().await.expect("Failed to ping database");
+
+    db.setup().await.expect("Failed to setup database");
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
@@ -87,8 +103,8 @@ async fn main() {
                             success_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                             return;
                         }
-                        Err(e) => {
-                            eprintln!("Write error: {:?}, retrying...", e);
+                        Err(_e) => {
+                            // eprintln!("Write error: {:?}, retrying...", e);
                             tokio::time::sleep(std::time::Duration::from_millis(retry_delay_ms))
                                 .await;
                             fail_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
