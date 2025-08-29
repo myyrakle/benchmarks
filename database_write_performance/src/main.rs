@@ -1,6 +1,120 @@
+use std::sync::atomic::AtomicU64;
+
 pub mod db;
+
+#[derive(Clone)]
+struct WriteEntry {
+    key: String,
+    value: String,
+}
 
 #[tokio::main]
 async fn main() {
-    println!("Hello, world!");
+    let db = db::FakeDB::new();
+    db.ping().await.expect("Failed to ping database");
+
+    let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
+
+    let worker_count = 1000;
+
+    let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
+
+    // producer
+    tokio::spawn(async move {
+        for (i, line) in csv_text.lines().enumerate() {
+            if i % 10000 == 0 {
+                println!("Writing {} lines", i);
+            }
+
+            let mut parts = line.splitn(2, ',');
+            let key = parts.next().unwrap();
+            let value = parts.next().unwrap();
+
+            let entry = WriteEntry {
+                key: key.to_string(),
+                value: value.to_string(),
+            };
+
+            sender.send(entry).await.expect("Failed to send entry");
+        }
+    });
+
+    let retry_count = 10;
+    let retry_delay_ms = 100;
+
+    let _fail_count = std::sync::Arc::new(AtomicU64::new(0));
+    let _success_count = std::sync::Arc::new(AtomicU64::new(0));
+    let _max_latency_ms = std::sync::Arc::new(AtomicU64::new(0));
+    let _min_latency_ms = std::sync::Arc::new(AtomicU64::new(u64::MAX));
+    let _total_latency_ms = std::sync::Arc::new(AtomicU64::new(0));
+
+    // consumer
+    let fail_count = _fail_count.clone();
+    let success_count = _success_count.clone();
+    let max_latency_ms = _max_latency_ms.clone();
+    let min_latency_ms = _min_latency_ms.clone();
+    let total_latency_ms = _total_latency_ms.clone();
+
+    let start = std::time::Instant::now();
+    tokio::spawn(async move {
+        while let Some(entry) = receiver.recv().await {
+            let db = db.clone();
+            let fail_count = fail_count.clone();
+            let max_latency_ms = max_latency_ms.clone();
+            let min_latency_ms = min_latency_ms.clone();
+            let total_latency_ms = total_latency_ms.clone();
+            let success_count = success_count.clone();
+
+            tokio::spawn(async move {
+                for _ in 0..retry_count {
+                    let write_start = std::time::Instant::now();
+
+                    match db.write(&entry.key, &entry.value).await {
+                        Ok(_) => {
+                            let write_duration = write_start.elapsed();
+                            max_latency_ms.fetch_max(
+                                write_duration.as_millis() as u64,
+                                std::sync::atomic::Ordering::SeqCst,
+                            );
+                            min_latency_ms.fetch_min(
+                                write_duration.as_millis() as u64,
+                                std::sync::atomic::Ordering::SeqCst,
+                            );
+                            total_latency_ms.fetch_add(
+                                write_duration.as_millis() as u64,
+                                std::sync::atomic::Ordering::SeqCst,
+                            );
+                            success_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                            return;
+                        }
+                        Err(e) => {
+                            eprintln!("Write error: {:?}, retrying...", e);
+                            tokio::time::sleep(std::time::Duration::from_millis(retry_delay_ms))
+                                .await;
+                            fail_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                        }
+                    }
+                }
+            });
+        }
+    })
+    .await
+    .unwrap();
+
+    let duration = start.elapsed();
+
+    println!("@ All writes completed in {:?}", duration);
+    println!(
+        "@ Fail count: {}",
+        _fail_count.load(std::sync::atomic::Ordering::SeqCst)
+    );
+    let total = _total_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
+    let max = _max_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
+    let min = _min_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
+    let success = _success_count.load(std::sync::atomic::Ordering::SeqCst);
+    let avg = total as f64 / success as f64;
+    println!("@ Total latency: {} ms", total);
+    println!("@ Max latency: {} ms", max);
+    println!("@ Min latency: {} ms", min);
+    println!("@ Avg latency: {:.2} ms", avg);
 }
