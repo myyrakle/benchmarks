@@ -31,7 +31,7 @@ async fn main() {
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
-    let worker_count = 1000;
+    let worker_count = 10000;
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
 
@@ -129,8 +129,10 @@ async fn main() {
     let min = _min_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
     let success = _success_count.load(std::sync::atomic::Ordering::SeqCst);
     let avg = total as f64 / success as f64;
+    let tps = success as f64 / duration.as_secs_f64();
     println!("@ Total latency: {} ms", total);
     println!("@ Max latency: {} ms", max);
     println!("@ Min latency: {} ms", min);
     println!("@ Avg latency: {:.2} ms", avg);
+    println!("@ Throughput: {:.2} writes/sec(TPS)", tps);
 }
