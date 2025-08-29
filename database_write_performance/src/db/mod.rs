@@ -1,9 +1,25 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod postgres;
+
 #[async_trait::async_trait]
 pub trait Database {
+    // connection ping
     async fn ping(&self) -> Result<()>;
+
+    // create table if not exists
+    // re-create table if exists
+    async fn setup(&self) -> Result<()>;
+
+    // write key, value
     async fn write(&self, key: &str, value: &str) -> Result<()>;
+}
+
+pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Sync>> {
+    match db_type {
+        "postgres" => postgres::PostgresDB::new().await,
+        _ => Err(Errors::ConnectionError),
+    }
 }
 
 pub enum Errors {
@@ -36,6 +52,10 @@ impl FakeDB {
 #[async_trait::async_trait]
 impl Database for FakeDB {
     async fn ping(&self) -> Result<()> {
+        Ok(())
+    }
+
+    async fn setup(&self) -> Result<()> {
         Ok(())
     }
 
