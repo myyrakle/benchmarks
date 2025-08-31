@@ -4,11 +4,11 @@ use std::sync::Arc;
 use super::{Database, Errors, Result};
 
 #[derive(Debug)]
-pub struct ScyllaDB {
+pub struct CassandraDB {
     session: Session,
 }
 
-impl ScyllaDB {
+impl CassandraDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
         let session = SessionBuilder::new()
             .known_node("127.0.0.1:19043")
@@ -16,12 +16,12 @@ impl ScyllaDB {
             .await
             .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
-        Ok(Arc::new(ScyllaDB { session }))
+        Ok(Arc::new(CassandraDB { session }))
     }
 }
 
 #[async_trait::async_trait]
-impl Database for ScyllaDB {
+impl Database for CassandraDB {
     async fn ping(&self) -> Result<()> {
         // Cassandra의 system.local 테이블을 쿼리하여 연결 테스트
         let _result = self
