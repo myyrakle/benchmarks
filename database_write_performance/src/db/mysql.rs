@@ -17,7 +17,7 @@ impl MySqlDB {
             .min_connections(1000) // 최소 연결 수 (즉시 생성)
             .connect(connection_string)
             .await
-            .map_err(|_| Errors::ConnectionError)?;
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
         Ok(Arc::new(MySqlDB { pool }))
     }
@@ -29,7 +29,7 @@ impl Database for MySqlDB {
         sqlx::query("SELECT 1")
             .execute(&self.pool)
             .await
-            .map_err(|_| Errors::ConnectionError)?;
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
         Ok(())
     }
 

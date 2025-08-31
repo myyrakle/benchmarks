@@ -18,17 +18,20 @@ pub struct MongoDB {
 
 impl MongoDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
-        let connection_string = "mongodb://user:q1w2e3r4@127.0.0.1:27017/benchmark";
+        // admin 데이터베이스로 인증 후 benchmark 데이터베이스 사용
+        let connection_string =
+            "mongodb://user:q1w2e3r4@127.0.0.1:27017/benchmark?authSource=admin";
 
         let mut client_options = ClientOptions::parse(connection_string)
             .await
-            .map_err(|_| Errors::ConnectionError)?;
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
         // 커넥션 풀 설정
         client_options.max_pool_size = Some(1000);
         client_options.min_pool_size = Some(10);
 
-        let client = Client::with_options(client_options).map_err(|_| Errors::ConnectionError)?;
+        let client = Client::with_options(client_options)
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
         Ok(Arc::new(MongoDB { client }))
     }
@@ -39,10 +42,10 @@ impl Database for MongoDB {
     async fn ping(&self) -> Result<()> {
         // MongoDB ping을 위해 간단한 명령 실행
         self.client
-            .database("admin")
+            .database("benchmark")
             .run_command(mongodb::bson::doc! { "ping": 1 })
             .await
-            .map_err(|_| Errors::ConnectionError)?;
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
         Ok(())
     }

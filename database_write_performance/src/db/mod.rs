@@ -22,12 +22,12 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "postgres" => postgres::PostgresDB::new().await,
         "mysql" => mysql::MySqlDB::new().await,
         "mongodb" => mongodb::MongoDB::new().await,
-        _ => Err(Errors::ConnectionError),
+        _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
 
 pub enum Errors {
-    ConnectionError,
+    ConnectionError(String),
     WriteError,
     ReadError,
 }
@@ -35,7 +35,7 @@ pub enum Errors {
 impl Debug for Errors {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Errors::ConnectionError => write!(f, "ConnectionError"),
+            Errors::ConnectionError(msg) => write!(f, "ConnectionError: {}", msg),
             Errors::WriteError => write!(f, "WriteError"),
             Errors::ReadError => write!(f, "ReadError"),
         }
