@@ -67,6 +67,17 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  scylladb: 
+    image: scylladb/scylla:2025.3
+    volumes:
+      - scylla_data:/var/lib/scylla
+    ports:
+      - "19043:9042"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -77,3 +88,5 @@ volumes:
     driver: local
   cassandra_data:
     driver: local 
+  scylla_data:
+    driver: local
