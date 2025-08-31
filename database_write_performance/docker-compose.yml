@@ -112,6 +112,18 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  couchdb:
+    image: couchdb:3.4
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+      - ./couchdb/local.ini:/opt/couchdb/etc/local.d/local.ini
+    ports:
+      - "15984:5984"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -127,4 +139,6 @@ volumes:
   influxdb_data:
     driver: local
   timescaledb_data:
+    driver: local
+  couchdb_data:
     driver: local
