@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: benchmark
     volumes:
       - pgdata:/var/lib/postgresql/data
+    command: -c 'max_connections=1000'
     ports:
       - "15432:5432"
     deploy:
@@ -23,8 +24,24 @@ services:
       MYSQL_PASSWORD: q1w2e3r4
     volumes:
       - mysql_data:/var/lib/mysql
+    command: [ "--max_connections=1000" ]
     ports:
       - "13306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+  mongodb:
+    image: mongo:8
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: q1w2e3r4
+      MONGO_INITDB_DATABASE: benchmark
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
     deploy:
       resources:
         limits:
@@ -35,4 +52,6 @@ volumes:
   pgdata:
     driver: local
   mysql_data:
+    driver: local
+  mongo_data:
     driver: local

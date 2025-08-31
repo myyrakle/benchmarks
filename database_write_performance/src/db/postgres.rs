@@ -1,4 +1,4 @@
-use sqlx::PgPool;
+use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::sync::Arc;
 
 use super::{Database, Errors, Result};
@@ -12,7 +12,10 @@ impl PostgresDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
         let connection_string = "postgres://user:q1w2e3r4@127.0.0.1:15432/benchmark";
 
-        let pool = PgPool::connect(connection_string)
+        let pool = PgPoolOptions::new()
+            .max_connections(1000) // 최대 연결 수
+            .min_connections(1000) // 최소 연결 수 (즉시 생성)
+            .connect(connection_string)
             .await
             .map_err(|_| Errors::ConnectionError)?;
 
