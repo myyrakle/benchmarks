@@ -1,5 +1,6 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod mysql;
 pub mod postgres;
 
 #[async_trait::async_trait]
@@ -18,6 +19,7 @@ pub trait Database {
 pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Sync>> {
     match db_type {
         "postgres" => postgres::PostgresDB::new().await,
+        "mysql" => mysql::MySqlDB::new().await,
         _ => Err(Errors::ConnectionError),
     }
 }
