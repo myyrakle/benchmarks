@@ -14,7 +14,7 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
         eprintln!("Usage: {} <db_type>", args[0]);
-        eprintln!("db_type: postgres, fake");
+        eprintln!("db_type: postgres, mysql, mongodb, fake");
         std::process::exit(1);
     }
 
@@ -72,9 +72,20 @@ async fn main() {
     let total_latency_ms = _total_latency_ms.clone();
 
     let start = std::time::Instant::now();
+
     tokio::spawn(async move {
+        let request_count = std::sync::Arc::new(AtomicU64::new(0));
+        let done_count = std::sync::Arc::new(AtomicU64::new(0));
+        let semaphore = std::sync::Arc::new(tokio::sync::Semaphore::new(worker_count));
+
         while let Some(entry) = receiver.recv().await {
+            // recv 후 바로 세마포어 획득 - 이 지점에서 블록됨
+            let permit = semaphore.clone().acquire_owned().await.unwrap();
+
+            request_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+
             let db = db.clone();
+            let done_count = done_count.clone();
             let fail_count = fail_count.clone();
             let max_latency_ms = max_latency_ms.clone();
             let min_latency_ms = min_latency_ms.clone();
@@ -82,6 +93,9 @@ async fn main() {
             let success_count = success_count.clone();
 
             tokio::spawn(async move {
+                // permit을 spawn 내부로 이동
+                let _permit = permit;
+
                 for _ in 0..retry_count {
                     let write_start = std::time::Instant::now();
 
@@ -101,7 +115,8 @@ async fn main() {
                                 std::sync::atomic::Ordering::SeqCst,
                             );
                             success_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                            return;
+
+                            break;
                         }
                         Err(_e) => {
                             // eprintln!("Write error: {:?}, retrying...", e);
@@ -111,7 +126,17 @@ async fn main() {
                         }
                     }
                 }
+
+                done_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                // _permit이 drop되면서 자동으로 세마포어 해제
             });
+        }
+        let request_count = request_count.load(std::sync::atomic::Ordering::SeqCst);
+        println!("@ All requests sent: {}", request_count);
+
+        // 모든 작업이 끝날 때까지 대기
+        while done_count.load(std::sync::atomic::Ordering::SeqCst) < request_count {
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
     })
     .await
@@ -121,8 +146,9 @@ async fn main() {
 
     println!("@ All writes completed in {:?}", duration);
     println!(
-        "@ Fail count: {}",
-        _fail_count.load(std::sync::atomic::Ordering::SeqCst)
+        "@ Fail count: {}, Success count: {}",
+        _fail_count.load(std::sync::atomic::Ordering::SeqCst),
+        _success_count.load(std::sync::atomic::Ordering::SeqCst)
     );
     let total = _total_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
     let max = _max_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
@@ -130,7 +156,7 @@ async fn main() {
     let success = _success_count.load(std::sync::atomic::Ordering::SeqCst);
     let avg = total as f64 / success as f64;
     let tps = success as f64 / duration.as_secs_f64();
-    println!("@ Total latency: {} ms", total);
+
     println!("@ Max latency: {} ms", max);
     println!("@ Min latency: {} ms", min);
     println!("@ Avg latency: {:.2} ms", avg);
