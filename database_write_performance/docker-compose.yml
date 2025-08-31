@@ -112,6 +112,7 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+
 volumes:
   pgdata:
     driver: local
