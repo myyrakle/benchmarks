@@ -21,6 +21,8 @@ services:
       MYSQL_DATABASE: benchmark
       MYSQL_USER: user
       MYSQL_PASSWORD: q1w2e3r4
+    volumes:
+      - mysql_data:/var/lib/mysql
     ports:
       - "13306:3306"
     deploy:
@@ -31,4 +33,6 @@ services:
 
 volumes:
   pgdata:
+    driver: local
+  mysql_data:
     driver: local

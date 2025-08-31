@@ -31,7 +31,7 @@ async fn main() {
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
-    let worker_count = 10000;
+    let worker_count = 1000;
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
 
@@ -72,6 +72,9 @@ async fn main() {
     let total_latency_ms = _total_latency_ms.clone();
 
     let start = std::time::Instant::now();
+
+    let mut handles = Vec::new();
+
     tokio::spawn(async move {
         while let Some(entry) = receiver.recv().await {
             let db = db.clone();
@@ -81,7 +84,7 @@ async fn main() {
             let total_latency_ms = total_latency_ms.clone();
             let success_count = success_count.clone();
 
-            tokio::spawn(async move {
+            let handle = tokio::spawn(async move {
                 for _ in 0..retry_count {
                     let write_start = std::time::Instant::now();
 
@@ -112,7 +115,11 @@ async fn main() {
                     }
                 }
             });
+            handles.push(handle);
         }
+
+        // 모든 write 작업이 완료될 때까지 기다림
+        futures::future::join_all(handles).await;
     })
     .await
     .unwrap();
@@ -121,8 +128,9 @@ async fn main() {
 
     println!("@ All writes completed in {:?}", duration);
     println!(
-        "@ Fail count: {}",
-        _fail_count.load(std::sync::atomic::Ordering::SeqCst)
+        "@ Fail count: {}, Success count: {}",
+        _fail_count.load(std::sync::atomic::Ordering::SeqCst),
+        _success_count.load(std::sync::atomic::Ordering::SeqCst)
     );
     let total = _total_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
     let max = _max_latency_ms.load(std::sync::atomic::Ordering::SeqCst);
@@ -130,7 +138,7 @@ async fn main() {
     let success = _success_count.load(std::sync::atomic::Ordering::SeqCst);
     let avg = total as f64 / success as f64;
     let tps = success as f64 / duration.as_secs_f64();
-    println!("@ Total latency: {} ms", total);
+
     println!("@ Max latency: {} ms", max);
     println!("@ Min latency: {} ms", min);
     println!("@ Avg latency: {:.2} ms", avg);
