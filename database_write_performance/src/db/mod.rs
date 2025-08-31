@@ -1,5 +1,6 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod cassandra;
 pub mod mongodb;
 pub mod mysql;
 pub mod postgres;
@@ -22,6 +23,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "postgres" => postgres::PostgresDB::new().await,
         "mysql" => mysql::MySqlDB::new().await,
         "mongodb" => mongodb::MongoDB::new().await,
+        "cassandra" => cassandra::CassandraDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
