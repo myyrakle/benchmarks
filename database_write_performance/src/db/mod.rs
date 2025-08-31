@@ -1,5 +1,6 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod mongodb;
 pub mod mysql;
 pub mod postgres;
 
@@ -20,6 +21,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
     match db_type {
         "postgres" => postgres::PostgresDB::new().await,
         "mysql" => mysql::MySqlDB::new().await,
+        "mongodb" => mongodb::MongoDB::new().await,
         _ => Err(Errors::ConnectionError),
     }
 }
