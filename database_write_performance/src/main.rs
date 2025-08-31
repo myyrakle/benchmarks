@@ -14,7 +14,7 @@ async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
         eprintln!("Usage: {} <db_type>", args[0]);
-        eprintln!("db_type: postgres, mysql, mongodb, fake");
+        eprintln!("db_type: postgres, mysql, mongodb, scylla, cassandra, influxdb_v2, fake");
         std::process::exit(1);
     }
 
