@@ -15,7 +15,7 @@ async fn main() {
     if args.len() != 2 {
         eprintln!("Usage: {} <db_type>", args[0]);
         eprintln!(
-            "db_type: postgres, mysql, mongodb, scylla, cassandra, influxdb_v2, influxdb_v3, timescaledb, fake"
+            "db_type: postgres, mysql, mongodb, scylla, cassandra, influxdb_v2, influxdb_v3, timescaledb, couchdb, fake"
         );
         std::process::exit(1);
     }
@@ -33,7 +33,7 @@ async fn main() {
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
-    let worker_count = 10000;
+    let worker_count = 10000; // CouchDB: 2000
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
 

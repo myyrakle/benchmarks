@@ -1,6 +1,7 @@
 use std::{fmt::Debug, sync::Arc};
 
 pub mod cassandra;
+pub mod couchdb;
 pub mod influxdb_v2;
 pub mod mongodb;
 pub mod mysql;
@@ -30,6 +31,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "cassandra" => scylla::CassandraDB::new().await,
         "influxdb_v2" => influxdb_v2::InfluxDB::new().await,
         "timescaledb" => timescaledb::TimescaleDB::new().await,
+        "couchdb" => couchdb::CouchDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
