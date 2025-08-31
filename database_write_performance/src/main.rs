@@ -31,7 +31,7 @@ async fn main() {
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
-    let worker_count = 1000;
+    let worker_count = 10000;
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
 
@@ -73,18 +73,29 @@ async fn main() {
 
     let start = std::time::Instant::now();
 
-    let mut handles = Vec::new();
-
     tokio::spawn(async move {
+        let request_count = std::sync::Arc::new(AtomicU64::new(0));
+        let done_count = std::sync::Arc::new(AtomicU64::new(0));
+        let semaphore = std::sync::Arc::new(tokio::sync::Semaphore::new(worker_count));
+
         while let Some(entry) = receiver.recv().await {
+            // recv 후 바로 세마포어 획득 - 이 지점에서 블록됨
+            let permit = semaphore.clone().acquire_owned().await.unwrap();
+
+            request_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+
             let db = db.clone();
+            let done_count = done_count.clone();
             let fail_count = fail_count.clone();
             let max_latency_ms = max_latency_ms.clone();
             let min_latency_ms = min_latency_ms.clone();
             let total_latency_ms = total_latency_ms.clone();
             let success_count = success_count.clone();
 
-            let handle = tokio::spawn(async move {
+            tokio::spawn(async move {
+                // permit을 spawn 내부로 이동
+                let _permit = permit;
+
                 for _ in 0..retry_count {
                     let write_start = std::time::Instant::now();
 
@@ -104,7 +115,8 @@ async fn main() {
                                 std::sync::atomic::Ordering::SeqCst,
                             );
                             success_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                            return;
+
+                            break;
                         }
                         Err(_e) => {
                             // eprintln!("Write error: {:?}, retrying...", e);
@@ -114,12 +126,18 @@ async fn main() {
                         }
                     }
                 }
-            });
-            handles.push(handle);
-        }
 
-        // 모든 write 작업이 완료될 때까지 기다림
-        futures::future::join_all(handles).await;
+                done_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                // _permit이 drop되면서 자동으로 세마포어 해제
+            });
+        }
+        let request_count = request_count.load(std::sync::atomic::Ordering::SeqCst);
+        println!("@ All requests sent: {}", request_count);
+
+        // 모든 작업이 끝날 때까지 대기
+        while done_count.load(std::sync::atomic::Ordering::SeqCst) < request_count {
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
     })
     .await
     .unwrap();
