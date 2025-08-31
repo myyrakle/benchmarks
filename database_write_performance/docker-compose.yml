@@ -114,11 +114,31 @@ services:
           memory: 8096M
   couchdb:
     image: couchdb:3.4
+    environment:
+      COUCHDB_USER: user
+      COUCHDB_PASSWORD: q1w2e3r4
     volumes:
       - couchdb_data:/opt/couchdb/data
       - ./couchdb/local.ini:/opt/couchdb/etc/local.d/local.ini
     ports:
       - "15984:5984"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+  yugabytedb:
+    image: yugabytedb/yugabyte:2024.2.5.0-b59
+    command: ["bash", "-c", "yugabyted start --daemon=false --listen=0.0.0.0"]
+    environment:
+      - YSQL_PASSWORD=q1w2e3r4
+    volumes:
+      - yugabyte_data:/home/yugabyte/yb_data
+    ports:
+      - "17000:7000"  # YB-Master web UI
+      - "19000:9000"  # YB-TServer web UI  
+      - "15433:5433"  # YSQL (PostgreSQL-compatible)
+      - "19042:9042"  # YCQL (Cassandra-compatible)
     deploy:
       resources:
         limits:
@@ -141,4 +161,6 @@ volumes:
   timescaledb_data:
     driver: local
   couchdb_data:
+    driver: local
+  yugabyte_data: 
     driver: local
