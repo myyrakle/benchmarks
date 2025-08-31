@@ -96,7 +96,22 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
-
+  timescaledb: 
+    image: timescale/timescaledb:2.21.3-pg17
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: q1w2e3r4
+      POSTGRES_DB: benchmark
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    command: -c 'max_connections=1000'
+    ports:
+      - "25432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 volumes:
   pgdata:
     driver: local
@@ -109,4 +124,6 @@ volumes:
   scylla_data:
     driver: local
   influxdb_data:
+    driver: local
+  timescaledb_data:
     driver: local
