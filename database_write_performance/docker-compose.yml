@@ -161,6 +161,22 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  cockroachdb:
+    image: cockroachdb/cockroach:v24.2.5
+    command: start-single-node --insecure --http-addr=0.0.0.0:8080
+    environment:
+      COCKROACH_DATABASE: benchmark
+      COCKROACH_USER: user
+    volumes:
+      - cockroach_data:/cockroach/cockroach-data
+    ports:
+      - "26257:26257"  # CockroachDB SQL
+      - "8080:8080"    # CockroachDB Admin UI
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -182,4 +198,6 @@ volumes:
   couchdb_data:
     driver: local
   yugabyte_data: 
+    driver: local
+  cockroach_data:
     driver: local
