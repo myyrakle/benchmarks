@@ -166,7 +166,7 @@ services:
     command: start-single-node --insecure --http-addr=0.0.0.0:8080
     environment:
       COCKROACH_DATABASE: benchmark
-      COCKROACH_USER: user
+      COCKROACH_USER: benchmarkuser
     volumes:
       - cockroach_data:/cockroach/cockroach-data
     ports:
