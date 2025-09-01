@@ -3,6 +3,7 @@ use std::{fmt::Debug, sync::Arc};
 pub mod cassandra;
 pub mod couchdb;
 pub mod influxdb_v2;
+pub mod mariadb;
 pub mod mongodb;
 pub mod mysql;
 pub mod postgres;
@@ -27,6 +28,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
     match db_type {
         "postgres" => postgres::PostgresDB::new().await,
         "mysql" => mysql::MySqlDB::new().await,
+        "mariadb" => mariadb::MariaDB::new().await,
         "mongodb" => mongodb::MongoDB::new().await,
         "scylla" => cassandra::ScyllaDB::new().await,
         "cassandra" => scylla::CassandraDB::new().await,

@@ -32,6 +32,23 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      MARIADB_ROOT_PASSWORD: q1w2e3r4
+      MARIADB_DATABASE: benchmark
+      MARIADB_USER: user
+      MARIADB_PASSWORD: q1w2e3r4
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    command: ["--max_connections=1000", "--innodb-buffer-pool-size=4G"]
+    ports:
+      - "23306:3306"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
   mongodb:
     image: mongo:8
     environment:
@@ -149,6 +166,8 @@ volumes:
   pgdata:
     driver: local
   mysql_data:
+    driver: local
+  mariadb_data:
     driver: local
   mongo_data:
     driver: local
