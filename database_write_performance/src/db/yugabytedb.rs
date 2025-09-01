@@ -10,11 +10,11 @@ pub struct YugabyteDB {
 
 impl YugabyteDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
-        let connection_string = "postgres://yugabyte@127.0.0.1:15433/yugabyte";
+        let connection_string = "postgres://yugabyte:q1w2e3r4@127.0.0.1:5433/yugabyte";
 
         let pool = PgPoolOptions::new()
-            .max_connections(1000) // YugabyteDB에 적합한 연결 수
-            .min_connections(1000)
+            .max_connections(300) // YugabyteDB에 적합한 연결 수
+            .min_connections(200)
             .connect(connection_string)
             .await
             .map_err(|error| Errors::ConnectionError(error.to_string()))?;

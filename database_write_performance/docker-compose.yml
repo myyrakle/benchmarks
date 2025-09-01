@@ -128,8 +128,8 @@ services:
           cpus: "4"
           memory: 8096M
   yugabytedb:
-    image: yugabytedb/yugabyte:2.25.2.0-b359
-    command: ["bash", "-c", "yugabyted start --background=false"]
+    image: yugabytedb/yugabyte:2024.2.5.0-b59
+    command: ["bash", "-c", "yugabyted start --daemon=false --tserver_flags=ysql_max_connections=1000"]
     environment:
       - YSQL_PASSWORD=q1w2e3r4
     volumes:
