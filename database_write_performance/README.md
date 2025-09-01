@@ -24,7 +24,7 @@
 | TimescaleDB   | 978 s    | 10224 | 976 ms          | 348 ms      | 30283 ms    | 12 GB      |
 | CouchDB       | 3800 s   | 2631  | 189 ms          | 3 ms        | 2307 ms     | 28 GB      |
 | YugabyteDB    | 3179 s   | 3145  | 3177 ms         | 623 ms      | 7064 ms     | 2 GB       |
-| CockroachDB   | s        |       | ms              | ms          | ms          | ? GB       |
+| CockroachDB   | 3919 s   | 2551  | 3917 ms         | 156 ms      | 16015 ms    | 3.1 GB     |
 | Prometheus    | s        |       | ms              | ms          | ms          | ? GB       |
 | TiDB          | s        |       | ms              | ms          | ms          | ? GB       |
 | Clickhouse    | s        |       | ms              | ms          | ms          | ? GB       |
