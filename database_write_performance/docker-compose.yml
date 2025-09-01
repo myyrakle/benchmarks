@@ -128,8 +128,8 @@ services:
           cpus: "4"
           memory: 8096M
   yugabytedb:
-    image: yugabytedb/yugabyte:2024.2.5.0-b59
-    command: ["bash", "-c", "yugabyted start --daemon=false --listen=0.0.0.0"]
+    image: yugabytedb/yugabyte:2.25.2.0-b359
+    command: ["bash", "-c", "yugabyted start --background=false"]
     environment:
       - YSQL_PASSWORD=q1w2e3r4
     volumes:
@@ -137,7 +137,7 @@ services:
     ports:
       - "17000:7000"  # YB-Master web UI
       - "19000:9000"  # YB-TServer web UI  
-      - "15433:5433"  # YSQL (PostgreSQL-compatible)
+      - "5433:5433"  # YSQL (PostgreSQL-compatible)
       - "19042:9042"  # YCQL (Cassandra-compatible)
     deploy:
       resources:

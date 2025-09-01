@@ -8,6 +8,7 @@ pub mod mysql;
 pub mod postgres;
 pub mod scylla;
 pub mod timescaledb;
+pub mod yugabytedb;
 
 #[async_trait::async_trait]
 pub trait Database {
@@ -32,6 +33,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "influxdb_v2" => influxdb_v2::InfluxDB::new().await,
         "timescaledb" => timescaledb::TimescaleDB::new().await,
         "couchdb" => couchdb::CouchDB::new().await,
+        "yugabytedb" => yugabytedb::YugabyteDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }

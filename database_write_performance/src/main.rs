@@ -15,7 +15,7 @@ async fn main() {
     if args.len() != 2 {
         eprintln!("Usage: {} <db_type>", args[0]);
         eprintln!(
-            "db_type: postgres, mysql, mongodb, scylla, cassandra, influxdb_v2, influxdb_v3, timescaledb, couchdb, fake"
+            "db_type: postgres, mysql, mongodb, scylla, cassandra, influxdb_v2, influxdb_v3, timescaledb, couchdb, yugabytedb, fake"
         );
         std::process::exit(1);
     }
