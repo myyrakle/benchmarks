@@ -1,0 +1,70 @@
+use sqlx::{PgPool, postgres::PgPoolOptions};
+use std::sync::Arc;
+
+use super::{Queue, Errors, Result};
+
+#[derive(Debug)]
+pub struct PostgresDB {
+    pool: PgPool,
+}
+
+impl PostgresDB {
+    pub async fn new() -> Result<Arc<dyn Queue + Send + Sync>> {
+        let connection_string = "postgres://user:q1w2e3r4@127.0.0.1:15432/benchmark";
+
+        let pool = PgPoolOptions::new()
+            .max_connections(1000) // 최대 연결 수
+            .min_connections(1000) // 최소 연결 수 (즉시 생성)
+            .connect(connection_string)
+            .await
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
+
+        Ok(Arc::new(PostgresDB { pool }))
+    }
+}
+
+#[async_trait::async_trait]
+impl Queue for PostgresDB {
+    async fn ping(&self) -> Result<()> {
+        sqlx::query("SELECT 1")
+            .execute(&self.pool)
+            .await
+            .map_err(|error| Errors::ConnectionError(error.to_string()))?;
+        Ok(())
+    }
+
+    async fn setup(&self) -> Result<()> {
+        // 테이블이 존재하면 삭제
+        sqlx::query("DROP TABLE IF EXISTS key_value")
+            .execute(&self.pool)
+            .await
+            .map_err(|_| Errors::WriteError)?;
+
+        // 새 테이블 생성
+        sqlx::query(
+            "CREATE TABLE key_value (
+                key VARCHAR(255) PRIMARY KEY,
+                value TEXT NOT NULL
+            )",
+        )
+        .execute(&self.pool)
+        .await
+        .map_err(|_| Errors::WriteError)?;
+
+        Ok(())
+    }
+
+    async fn write(&self, key: &str, value: &str) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO key_value (key, value) VALUES ($1, $2) 
+             ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+        )
+        .bind(key)
+        .bind(value)
+        .execute(&self.pool)
+        .await
+        .map_err(|_| Errors::WriteError)?;
+
+        Ok(())
+    }
+}

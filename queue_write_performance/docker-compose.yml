@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: q1w2e3r4
+      POSTGRES_DB: benchmark
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: -c 'max_connections=1000'
+    ports:
+      - "15432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+
+volumes:
+  pgdata:
+    driver: local
