@@ -10,8 +10,9 @@ pub struct ClickHouse {
 impl ClickHouse {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
         let client = Client::default()
-            .with_url("http://localhost:8123")
-            .with_user("default")
+            .with_url("http://127.0.0.1:18123")
+            .with_user("user")
+            .with_password("q1w2e3r4")
             .with_database("benchmark");
 
         Ok(Arc::new(ClickHouse { client }))
@@ -21,18 +22,14 @@ impl ClickHouse {
 #[async_trait::async_trait]
 impl Database for ClickHouse {
     async fn ping(&self) -> Result<()> {
-        let result: u32 = self
-            .client
+        // 단순히 쿼리 실행이 성공하는지 확인
+        self.client
             .query("SELECT 1")
-            .fetch_one()
+            .execute()
             .await
             .map_err(|e| Errors::ConnectionError(e.to_string()))?;
 
-        if result == 1 {
-            Ok(())
-        } else {
-            Err(Errors::ConnectionError("Ping failed".to_string()))
-        }
+        Ok(())
     }
 
     async fn setup(&self) -> Result<()> {
@@ -70,7 +67,7 @@ impl Database for ClickHouse {
 
     async fn write(&self, key: &str, value: &str) -> Result<()> {
         self.client
-            .query("INSERT INTO benchmark.key_value (key, value) VALUES (?, ?)")
+            .query("INSERT INTO benchmark.key_value (key, value) SETTINGS async_insert=1, wait_for_async_insert=1 VALUES (?, ?)")
             .bind(key)
             .bind(value)
             .execute()
