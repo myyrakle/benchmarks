@@ -9,6 +9,7 @@ pub mod mariadb;
 pub mod mongodb;
 pub mod mysql;
 pub mod postgres;
+pub mod prometheus;
 pub mod scylla;
 pub mod timescaledb;
 pub mod yugabytedb;
@@ -40,6 +41,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "yugabytedb" => yugabytedb::YugabyteDB::new().await,
         "cockroachdb" => cockroachdb::CockroachDB::new().await,
         "clickhouse" => clickhouse::ClickHouse::new().await,
+        "prometheus" => prometheus::Prometheus::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
