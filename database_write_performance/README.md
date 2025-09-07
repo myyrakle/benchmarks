@@ -27,5 +27,5 @@
 | CockroachDB   | 3919 s   | 2551  | 3917 ms         | 156 ms      | 16015 ms    | 3.1 GB     |
 | Prometheus    | s        |       | ms              | ms          | ms          | ? GB       |
 | TiDB          | s        |       | ms              | ms          | ms          | ? GB       |
-| Clickhouse    | s        |       | ms              | ms          | ms          | ? GB       |
+| Clickhouse    | 1666 s   | 2032  | 306 ms          | 8 ms        | 9053 ms     | 2.4 GB     |
 | Elasticsearch | s        |       | ms              | ms          | ms          | ? GB       |
