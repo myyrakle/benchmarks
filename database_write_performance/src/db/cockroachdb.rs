@@ -38,13 +38,13 @@ impl Database for CockroachDB {
         sqlx::query("CREATE DATABASE IF NOT EXISTS benchmark")
             .execute(&self.pool)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 테이블이 존재하면 삭제
         sqlx::query("DROP TABLE IF EXISTS key_value")
             .execute(&self.pool)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 새 테이블 생성 (CockroachDB 최적화 포함)
         sqlx::query(
@@ -55,7 +55,7 @@ impl Database for CockroachDB {
         )
         .execute(&self.pool)
         .await
-        .map_err(|_| Errors::WriteError)?;
+        .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }
@@ -67,7 +67,7 @@ impl Database for CockroachDB {
             .bind(value)
             .execute(&self.pool)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }

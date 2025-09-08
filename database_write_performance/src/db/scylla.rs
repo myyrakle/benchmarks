@@ -44,19 +44,19 @@ impl Database for CassandraDB {
                 (),
             )
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 키스페이스 사용
         self.session
             .use_keyspace("benchmark", false)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 기존 테이블 삭제 (있다면)
         self.session
             .query_unpaged("DROP TABLE IF EXISTS key_value", ())
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 새 테이블 생성
         self.session
@@ -68,7 +68,7 @@ impl Database for CassandraDB {
                 (),
             )
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }
@@ -80,7 +80,7 @@ impl Database for CassandraDB {
                 (key, value),
             )
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }
