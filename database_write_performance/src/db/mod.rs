@@ -13,6 +13,7 @@ pub mod nats;
 pub mod postgres;
 pub mod scylla;
 pub mod timescaledb;
+pub mod ydb;
 pub mod yugabytedb;
 
 #[async_trait::async_trait]
@@ -44,6 +45,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "clickhouse" => clickhouse::ClickHouse::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
+        "ydb" => ydb::YDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }

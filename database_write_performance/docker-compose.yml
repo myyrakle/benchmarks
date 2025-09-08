@@ -239,6 +239,25 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  ydb:
+    image: ydbplatform/local-ydb:25.1.3
+    hostname: localhost
+    environment:
+      - YDB_DEFAULT_LOG_LEVEL=WARN
+      - GRPC_TLS_PORT=2135
+      - GRPC_PORT=2136
+      - MON_PORT=8765
+    volumes:
+      - ydb_data:/ydb_data
+    ports:
+      - "2135:2135"   # YDB gRPC TLS port
+      - "2136:2136"   # YDB gRPC port
+      - "8765:8765"   # YDB monitoring port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -268,4 +287,6 @@ volumes:
   etcd_data:
     driver: local
   nats_data:
+    driver: local
+  ydb_data:
     driver: local
