@@ -12,6 +12,7 @@ pub mod mysql;
 pub mod nats;
 pub mod postgres;
 pub mod scylla;
+pub mod tidb;
 pub mod timescaledb;
 pub mod yugabytedb;
 
@@ -44,13 +45,15 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "clickhouse" => clickhouse::ClickHouse::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
+        "ydb" => ydb::YDB::new().await,
+        "tidb" => tidb::TiDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
 
 pub enum Errors {
     ConnectionError(String),
-    WriteError,
+    WriteError(String),
     ReadError,
 }
 
@@ -58,7 +61,7 @@ impl Debug for Errors {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Errors::ConnectionError(msg) => write!(f, "ConnectionError: {}", msg),
-            Errors::WriteError => write!(f, "WriteError"),
+            Errors::WriteError(msg) => write!(f, "WriteError: {}", msg),
             Errors::ReadError => write!(f, "ReadError"),
         }
     }
