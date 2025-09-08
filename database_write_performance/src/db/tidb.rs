@@ -42,10 +42,10 @@ impl Database for TiDB {
 
         // 새 테이블 생성 (TiDB에 최적화)
         sqlx::query(
-            "CREATE TABLE key_value (
-                key VARCHAR(255) PRIMARY KEY,
-                value TEXT NOT NULL
-            ) ENGINE=InnoDB",
+            "CREATE TABLE `key_value` (
+                `key` VARCHAR(255) PRIMARY KEY,
+                `value` VARCHAR(1000) NOT NULL
+            )",
         )
         .execute(&self.pool)
         .await
@@ -56,8 +56,8 @@ impl Database for TiDB {
 
     async fn write(&self, key: &str, value: &str) -> Result<()> {
         sqlx::query(
-            "INSERT INTO key_value (key, value) VALUES (?, ?) 
-             ON DUPLICATE KEY UPDATE value = VALUES(value)",
+            "INSERT INTO key_value (`key`, `value`) VALUES (?, ?) 
+             ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)",
         )
         .bind(key)
         .bind(value)
