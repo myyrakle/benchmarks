@@ -13,6 +13,7 @@ pub mod nats;
 pub mod postgres;
 pub mod scylla;
 pub mod tidb;
+pub mod tikv;
 pub mod timescaledb;
 pub mod yugabytedb;
 
@@ -46,6 +47,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
+        "tikv" => tikv::TiKV::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
