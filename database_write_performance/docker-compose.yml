@@ -222,6 +222,23 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  nats:
+    image: nats:2.10-alpine
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+      - "-m=8222"
+    volumes:
+      - nats_data:/data
+    ports:
+      - "4222:4222"   # NATS client port
+      - "8222:8222"   # NATS HTTP monitoring port
+      - "6222:6222"   # NATS cluster port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -249,4 +266,6 @@ volumes:
   clickhouse_data:
     driver: local
   etcd_data:
+    driver: local
+  nats_data:
     driver: local
