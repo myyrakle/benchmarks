@@ -54,10 +54,7 @@ impl Database for TimescaleDB {
         sqlx::query("DROP TABLE IF EXISTS benchmark")
             .execute(&self.pool)
             .await
-            .map_err(|e| {
-                eprintln!("TimescaleDB table drop error: {:?}", e);
-                Errors::WriteError
-            })?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 하이퍼테이블 생성
         sqlx::query(
@@ -71,19 +68,13 @@ impl Database for TimescaleDB {
         )
         .execute(&self.pool)
         .await
-        .map_err(|e| {
-            eprintln!("TimescaleDB table creation error: {:?}", e);
-            Errors::WriteError
-        })?;
+        .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 하이퍼테이블로 변환
         sqlx::query("SELECT create_hypertable('benchmark', 'time')")
             .execute(&self.pool)
             .await
-            .map_err(|e| {
-                eprintln!("TimescaleDB hypertable creation error: {:?}", e);
-                Errors::WriteError
-            })?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }
@@ -94,10 +85,7 @@ impl Database for TimescaleDB {
             .bind(value)
             .execute(&self.pool)
             .await
-            .map_err(|e| {
-                eprintln!("TimescaleDB write error: {:?}", e);
-                Errors::WriteError
-            })?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }

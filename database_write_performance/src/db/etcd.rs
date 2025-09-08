@@ -50,7 +50,7 @@ impl Database for Etcd {
         self.client
             .put(put_request)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }

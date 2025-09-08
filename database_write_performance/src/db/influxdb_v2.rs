@@ -55,10 +55,7 @@ impl Database for InfluxDB {
             .field("value", value)
             .timestamp(timestamp)
             .build()
-            .map_err(|e| {
-                eprintln!("InfluxDB build point error: {:?}", e);
-                Errors::WriteError
-            })?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         match self
             .client
@@ -68,7 +65,7 @@ impl Database for InfluxDB {
             Ok(_) => Ok(()),
             Err(e) => {
                 eprintln!("InfluxDB write error: {:?}", e);
-                Err(Errors::WriteError)
+                Err(Errors::WriteError(e.to_string()))
             }
         }
     }

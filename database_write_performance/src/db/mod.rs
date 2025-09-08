@@ -52,7 +52,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
 
 pub enum Errors {
     ConnectionError(String),
-    WriteError,
+    WriteError(String),
     ReadError,
 }
 
@@ -60,7 +60,7 @@ impl Debug for Errors {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Errors::ConnectionError(msg) => write!(f, "ConnectionError: {}", msg),
-            Errors::WriteError => write!(f, "WriteError"),
+            Errors::WriteError(msg) => write!(f, "WriteError: {}", msg),
             Errors::ReadError => write!(f, "ReadError"),
         }
     }
