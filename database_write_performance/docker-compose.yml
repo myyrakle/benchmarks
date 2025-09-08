@@ -194,6 +194,34 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.17
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd-benchmark
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://0.0.0.0:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=etcd-benchmark=http://0.0.0.0:2380
+      - --initial-cluster-token=etcd-cluster-1
+      - --initial-cluster-state=new
+      - --log-level=info
+      - --logger=zap
+      - --log-outputs=stderr
+      - --auto-compaction-retention=1
+      - --quota-backend-bytes=8589934592
+    volumes:
+      - etcd_data:/etcd-data
+    ports:
+      - "2379:2379"   # etcd client port
+      - "2380:2380"   # etcd peer port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -219,4 +247,6 @@ volumes:
   cockroach_data:
     driver: local
   clickhouse_data:
+    driver: local
+  etcd_data:
     driver: local
