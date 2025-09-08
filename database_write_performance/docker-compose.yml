@@ -239,6 +239,16 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  tidb:
+    image: pingcap/tidb:v8.5.0
+    ports:
+      - "4000:4000"   # TiDB SQL port
+      - "10080:10080" # TiDB status port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:

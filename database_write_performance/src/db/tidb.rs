@@ -4,27 +4,27 @@ use std::sync::Arc;
 use super::{Database, Errors, Result};
 
 #[derive(Debug)]
-pub struct MySqlDB {
+pub struct TiDB {
     pool: MySqlPool,
 }
 
-impl MySqlDB {
+impl TiDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
-        let connection_string = "mysql://user:q1w2e3r4@127.0.0.1:13306/benchmark";
+        let connection_string = "mysql://root@127.0.0.1:4000/test";
 
         let pool = MySqlPoolOptions::new()
-            .max_connections(1000) // 최대 연결 수
-            .min_connections(1000) // 최소 연결 수 (즉시 생성)
+            .max_connections(1000) // TiDB에 적합한 연결 수
+            .min_connections(500)
             .connect(connection_string)
             .await
             .map_err(|error| Errors::ConnectionError(error.to_string()))?;
 
-        Ok(Arc::new(MySqlDB { pool }))
+        Ok(Arc::new(TiDB { pool }))
     }
 }
 
 #[async_trait::async_trait]
-impl Database for MySqlDB {
+impl Database for TiDB {
     async fn ping(&self) -> Result<()> {
         sqlx::query("SELECT 1")
             .execute(&self.pool)
@@ -40,11 +40,11 @@ impl Database for MySqlDB {
             .await
             .map_err(|e| Errors::WriteError(e.to_string()))?;
 
-        // 새 테이블 생성
+        // 새 테이블 생성 (TiDB에 최적화)
         sqlx::query(
-            "CREATE TABLE key_value (
+            "CREATE TABLE `key_value` (
                 `key` VARCHAR(255) PRIMARY KEY,
-                `value` TEXT NOT NULL
+                `value` VARCHAR(1000) NOT NULL
             )",
         )
         .execute(&self.pool)

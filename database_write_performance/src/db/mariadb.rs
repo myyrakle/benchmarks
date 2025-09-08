@@ -38,7 +38,7 @@ impl Database for MariaDB {
         sqlx::query("DROP TABLE IF EXISTS key_value")
             .execute(&self.pool)
             .await
-            .map_err(|_| Errors::WriteError)?;
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         // 새 테이블 생성
         sqlx::query(
@@ -49,7 +49,7 @@ impl Database for MariaDB {
         )
         .execute(&self.pool)
         .await
-        .map_err(|_| Errors::WriteError)?;
+        .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }
@@ -63,7 +63,7 @@ impl Database for MariaDB {
         .bind(value)
         .execute(&self.pool)
         .await
-        .map_err(|_| Errors::WriteError)?;
+        .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         Ok(())
     }

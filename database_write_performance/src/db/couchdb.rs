@@ -120,7 +120,7 @@ impl DbTrait for CouchDB {
             Ok(_) => Ok(()),
             Err(e) => {
                 eprintln!("CouchDB write error: {:?}", e);
-                Err(Errors::WriteError)
+                Err(Errors::WriteError(e.to_string()))
             }
         }
     }
