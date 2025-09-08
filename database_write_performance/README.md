@@ -14,7 +14,7 @@
 
 | DB             | Duration | TPS    | Avegate Latency | Min Latency | Max Latency | Disk Usage |
 | -------------- | -------- | ------ | --------------- | ----------- | ----------- | ---------- |
-| PostgreSQL     | 545 s    | 13800  | 542 ms          | 26 ms       | 3581 ms     | 3.7 GB     |
+| PostgreSQL     | 545 s    | 18315  | 542 ms          | 26 ms       | 3581 ms     | 3.7 GB     |
 | MySQL          | 3228 s   | 3143   | 3143 ms         | 53 ms       | 180705 ms   | 7.6 GB     |
 | MariaDB        | 2194 s   | 4751   | 2098 ms         | 3 ms        | 13098 ms    | 3.8 GB     |
 | MongoDB        | 376 s    | 26524  | 370 ms          | 201 ms      | 1288 ms     | 3.1 GB     |
@@ -27,6 +27,6 @@
 | CockroachDB    | 3919 s   | 2551   | 3917 ms         | 156 ms      | 16015 ms    | 3.1 GB     |
 | etcd           | 1367 s   | 7310   | 1366 ms         | 2 ms        | 2394 ms     | 2.6 GB     |
 | nats Jetstream | 83 s     | 120415 | 74 ms           | 7 ms        | 312 ms      | 1.9 GB     |
-| TiDB           | s        |        | ms              | ms          | ms          | ? GB       |
+| TiDB           | 562 s    | 17788  | 561 ms          | 2 ms        | 1626 ms     | ? GB       |
 | Clickhouse     | 1666 s   | 2032   | 306 ms          | 8 ms        | 9053 ms     | 2.4 GB     |
 | Elasticsearch  | s        |        | ms              | ms          | ms          | ? GB       |
