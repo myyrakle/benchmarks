@@ -250,48 +250,49 @@ services:
           cpus: "4"
           memory: 8096M
   
-  # TiKV single node setup
-  pd0:
+  # TiKV single node setup (minimal config)
+  pd:
     image: pingcap/pd:v8.5.0
-    ports:
-      - "2379:2379"   # PD client port
-      - "2380:2380"   # PD peer port
+    network_mode: host
     volumes:
-      - pd0_data:/data
+      - pd_data:/data
     command:
-      - --name=pd0
-      - --client-urls=http://0.0.0.0:2379
-      - --peer-urls=http://0.0.0.0:2380
-      - --advertise-client-urls=http://pd0:2379
-      - --advertise-peer-urls=http://pd0:2380
-      - --initial-cluster=pd0=http://pd0:2380
-      - --data-dir=/data/pd0
-      - --log-file=/logs/pd0.log
+      - --name=pd
+      - --data-dir=/data
+      - --client-urls=http://0.0.0.0:12379
+      - --peer-urls=http://0.0.0.0:12380
+      - --advertise-client-urls=http://localhost:12379
+      - --advertise-peer-urls=http://localhost:12380
+      - --initial-cluster=pd=http://localhost:12380
+    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: "2"
           memory: 4096M
 
-  tikv0:
+  tikv:
     image: pingcap/tikv:v8.5.0
-    ports:
-      - "20160:20160"  # TiKV port
+    network_mode: host
     volumes:
-      - tikv0_data:/data
+      - tikv_data:/data
     command:
+      - --data-dir=/data
       - --addr=0.0.0.0:20160
-      - --advertise-addr=tikv0:20160
-      - --data-dir=/data/tikv0
-      - --pd=pd0:2379
-      - --log-file=/logs/tikv0.log
+      - --advertise-addr=localhost:20160
+      - --pd=localhost:12379
     depends_on:
-      - pd0
+      - pd
+    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: "4"
           memory: 8096M
+
+networks:
+  default:
+    driver: bridge
 
 volumes:
   pgdata:
@@ -322,7 +323,7 @@ volumes:
     driver: local
   nats_data:
     driver: local
-  pd0_data:
+  pd_data:
     driver: local
-  tikv0_data:
+  tikv_data:
     driver: local

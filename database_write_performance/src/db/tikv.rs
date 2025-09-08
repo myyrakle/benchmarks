@@ -9,8 +9,7 @@ pub struct TiKV {
 
 impl TiKV {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
-        // PD (Placement Driver) 엔드포인트
-        let pd_endpoints = vec!["127.0.0.1:2379"];
+        let pd_endpoints = vec!["localhost:12379"];
 
         let client = RawClient::new(pd_endpoints)
             .await
