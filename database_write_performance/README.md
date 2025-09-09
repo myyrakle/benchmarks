@@ -31,3 +31,4 @@
 | TiKV           | 1235 s   | 8093   | 1234 ms         | 4 ms        | 2586 ms     | 24 GB      |
 | Clickhouse     | 1666 s   | 2032   | 306 ms          | 8 ms        | 9053 ms     | 2.4 GB     |
 | Elasticsearch  | 525 s    | 19037  | 47 ms           | 2 ms        | 4295 ms     | 5.2 GB     |
+| Opensearch     | 642 s    | 15556  | 59 ms           | 1 ms        | 4079 ms     | 5.3 GB     |

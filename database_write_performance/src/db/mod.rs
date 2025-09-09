@@ -11,6 +11,7 @@ pub mod mariadb;
 pub mod mongodb;
 pub mod mysql;
 pub mod nats;
+pub mod opensearch;
 pub mod postgres;
 pub mod scylla;
 pub mod tidb;
@@ -50,6 +51,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "cockroachdb" => cockroachdb::CockroachDB::new().await,
         "clickhouse" => clickhouse::ClickHouse::new().await,
         "elasticsearch" => elasticsearch::ElasticsearchDB::new().await,
+        "opensearch" => opensearch::OpenSearchDB::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
