@@ -117,4 +117,8 @@ impl Database for ElasticsearchDB {
 
         Ok(())
     }
+
+    fn worker_count(&self) -> usize {
+        1000
+    }
 }

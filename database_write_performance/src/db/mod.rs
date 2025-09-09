@@ -29,6 +29,10 @@ pub trait Database {
 
     // write key, value
     async fn write(&self, key: &str, value: &str) -> Result<()>;
+
+    fn worker_count(&self) -> usize {
+        10000
+    }
 }
 
 pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Sync>> {

@@ -33,7 +33,7 @@ async fn main() {
 
     let csv_text = std::fs::read_to_string("dataset.csv").unwrap();
 
-    let worker_count = 10000; // CouchDB: 500
+    let worker_count = db.worker_count();
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<WriteEntry>(worker_count);
 

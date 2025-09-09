@@ -30,4 +30,4 @@
 | TiDB           | 562 s    | 17788  | 561 ms          | 2 ms        | 1626 ms     | 3.1 GB     |
 | TiKV           | 1235 s   | 8093   | 1234 ms         | 4 ms        | 2586 ms     | 24 GB      |
 | Clickhouse     | 1666 s   | 2032   | 306 ms          | 8 ms        | 9053 ms     | 2.4 GB     |
-| Elasticsearch  | s        |        | ms              | ms          | ms          | ? GB       |
+| Elasticsearch  | 525 s    | 19037  | 47 ms           | 2 ms        | 4295 ms     | 5.2 GB     |

@@ -124,4 +124,8 @@ impl DbTrait for CouchDB {
             }
         }
     }
+
+    fn worker_count(&self) -> usize {
+        500
+    }
 }
