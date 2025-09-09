@@ -4,6 +4,7 @@ pub mod cassandra;
 pub mod clickhouse;
 pub mod cockroachdb;
 pub mod couchdb;
+pub mod elasticsearch;
 pub mod etcd;
 pub mod influxdb_v2;
 pub mod mariadb;
@@ -44,6 +45,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "yugabytedb" => yugabytedb::YugabyteDB::new().await,
         "cockroachdb" => cockroachdb::CockroachDB::new().await,
         "clickhouse" => clickhouse::ClickHouse::new().await,
+        "elasticsearch" => elasticsearch::ElasticsearchDB::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,

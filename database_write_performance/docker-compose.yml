@@ -250,6 +250,17 @@ services:
           cpus: "4"
           memory: 8096M
   
+  memcached:
+    image: memcached:1.6-alpine
+    ports:
+      - "11211:11211"   # Memcached port
+    command: memcached -m 16384 -c 1024 -I 32m
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 18432M
+  
   # TiKV single node setup (minimal config)
   pd:
     image: pingcap/pd:v8.5.0
@@ -281,18 +292,37 @@ services:
       - --addr=0.0.0.0:20160
       - --advertise-addr=localhost:20160
       - --pd=localhost:12379
-    depends_on:
-      - pd
-    restart: unless-stopped
     deploy:
       resources:
         limits:
           cpus: "4"
           memory: 8096M
 
-networks:
-  default:
-    driver: bridge
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=benchmark-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "19200:9200"   # Elasticsearch HTTP API
+      - "19300:9300"   # Elasticsearch transport port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
 
 volumes:
   pgdata:
@@ -326,4 +356,6 @@ volumes:
   pd_data:
     driver: local
   tikv_data:
+    driver: local
+  elasticsearch_data:
     driver: local
