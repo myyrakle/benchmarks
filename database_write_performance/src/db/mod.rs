@@ -5,6 +5,7 @@ pub mod clickhouse;
 pub mod cockroachdb;
 pub mod couchdb;
 pub mod etcd;
+pub mod foundationdb;
 pub mod influxdb_v2;
 pub mod mariadb;
 pub mod mongodb;
@@ -48,6 +49,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
         "tikv" => tikv::TiKV::new().await,
+        "foundationdb" => foundationdb::FoundationDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }

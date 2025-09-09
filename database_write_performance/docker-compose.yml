@@ -250,6 +250,21 @@ services:
           cpus: "4"
           memory: 8096M
   
+  foundationdb:
+    image: foundationdb/foundationdb:7.1.61
+    environment:
+      FDB_NETWORKING_MODE: host
+    ports:
+      - "4500:4500"   # FoundationDB coordinator port
+    volumes:
+      - fdb_data:/var/fdb/data
+      - fdb_logs:/var/fdb/logs
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+  
   # TiKV single node setup (minimal config)
   pd:
     image: pingcap/pd:v8.5.0
@@ -326,4 +341,8 @@ volumes:
   pd_data:
     driver: local
   tikv_data:
+    driver: local
+  fdb_data:
+    driver: local
+  fdb_logs:
     driver: local

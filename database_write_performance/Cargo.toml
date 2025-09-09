@@ -9,6 +9,7 @@ async-trait = "0.1.89"
 clickhouse = "0.13.3"
 couch_rs = "0.10.1"
 etcd-rs = "1.0.1"
+foundationdb = "0.9.2"
 futures = "0.3.31"
 influxdb2 = "0.5.1"
 influxdb = { version = "0.7.2", features = ["derive"] }
