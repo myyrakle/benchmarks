@@ -250,6 +250,27 @@ services:
           cpus: "4"
           memory: 8096M
   
+  surrealdb:
+    entrypoint: 
+      - /surreal 
+      - start 
+      - --user
+      - user
+      - --pass
+      - q1w2e3r4
+      - rocksdb:/mydata/mydatabase.db
+    image: surrealdb/surrealdb:v2.3.7
+    ports:
+      - 8000:8000
+    volumes:
+      - surrealdb_data:/mydata
+    user: root
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+  
   # TiKV single node setup (minimal config)
   pd:
     image: pingcap/pd:v8.5.0
@@ -326,4 +347,6 @@ volumes:
   pd_data:
     driver: local
   tikv_data:
+    driver: local
+  surrealdb_data:
     driver: local

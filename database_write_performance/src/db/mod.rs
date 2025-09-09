@@ -12,6 +12,7 @@ pub mod mysql;
 pub mod nats;
 pub mod postgres;
 pub mod scylla;
+pub mod surrealdb;
 pub mod tidb;
 pub mod tikv;
 pub mod timescaledb;
@@ -48,6 +49,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
         "tikv" => tikv::TiKV::new().await,
+        "surrealdb" => surrealdb::SurrealDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
