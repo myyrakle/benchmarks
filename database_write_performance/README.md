@@ -27,6 +27,7 @@
 | CockroachDB    | 3919 s   | 2551   | 3917 ms         | 156 ms      | 16015 ms    | 3.1 GB     |
 | etcd           | 1367 s   | 7310   | 1366 ms         | 2 ms        | 2394 ms     | 2.6 GB     |
 | nats Jetstream | 83 s     | 120415 | 74 ms           | 7 ms        | 312 ms      | 1.9 GB     |
-| TiDB           | 562 s    | 17788  | 561 ms          | 2 ms        | 1626 ms     | 3.1 GB       |
+| TiDB           | 562 s    | 17788  | 561 ms          | 2 ms        | 1626 ms     | 3.1 GB     |
+| TiKV           | 1235 s   | 8093   | 1234 ms         | 4 ms        | 2586 ms     | 24 GB      |
 | Clickhouse     | 1666 s   | 2032   | 306 ms          | 8 ms        | 9053 ms     | 2.4 GB     |
 | Elasticsearch  | s        |        | ms              | ms          | ms          | ? GB       |

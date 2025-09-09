@@ -249,6 +249,50 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  
+  # TiKV single node setup (minimal config)
+  pd:
+    image: pingcap/pd:v8.5.0
+    network_mode: host
+    volumes:
+      - pd_data:/data
+    command:
+      - --name=pd
+      - --data-dir=/data
+      - --client-urls=http://0.0.0.0:12379
+      - --peer-urls=http://0.0.0.0:12380
+      - --advertise-client-urls=http://localhost:12379
+      - --advertise-peer-urls=http://localhost:12380
+      - --initial-cluster=pd=http://localhost:12380
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4096M
+
+  tikv:
+    image: pingcap/tikv:v8.5.0
+    network_mode: host
+    volumes:
+      - tikv_data:/data
+    command:
+      - --data-dir=/data
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=localhost:20160
+      - --pd=localhost:12379
+    depends_on:
+      - pd
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+
+networks:
+  default:
+    driver: bridge
 
 volumes:
   pgdata:
@@ -278,4 +322,8 @@ volumes:
   etcd_data:
     driver: local
   nats_data:
+    driver: local
+  pd_data:
+    driver: local
+  tikv_data:
     driver: local
