@@ -350,6 +350,22 @@ services:
           cpus: "4"
           memory: 8096M
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.16
+    environment:
+      - MEILI_MASTER_KEY=benchmark-master-key
+      - MEILI_ENV=development
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch_data:/meili_data
+    ports:
+      - "17700:7700"   # MeiliSearch HTTP API
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+
 volumes:
   pgdata:
     driver: local
@@ -386,4 +402,6 @@ volumes:
   elasticsearch_data:
     driver: local
   opensearch_data:
+    driver: local
+  meilisearch_data:
     driver: local

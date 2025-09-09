@@ -8,6 +8,7 @@ pub mod elasticsearch;
 pub mod etcd;
 pub mod influxdb_v2;
 pub mod mariadb;
+pub mod meilisearch;
 pub mod mongodb;
 pub mod mysql;
 pub mod nats;
@@ -52,6 +53,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "clickhouse" => clickhouse::ClickHouse::new().await,
         "elasticsearch" => elasticsearch::ElasticsearchDB::new().await,
         "opensearch" => opensearch::OpenSearchDB::new().await,
+        "meilisearch" => meilisearch::MeiliSearchDB::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
