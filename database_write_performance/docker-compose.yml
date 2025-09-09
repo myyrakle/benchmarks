@@ -250,6 +250,19 @@ services:
           cpus: "4"
           memory: 8096M
   
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"   # Redis port
+    volumes:
+      - redis_data:/data
+    command: redis-server 
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 16096M
+  
   # TiKV single node setup (minimal config)
   pd:
     image: pingcap/pd:v8.5.0
@@ -326,4 +339,6 @@ volumes:
   pd_data:
     driver: local
   tikv_data:
+    driver: local
+  redis_data:
     driver: local

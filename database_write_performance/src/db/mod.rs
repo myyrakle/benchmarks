@@ -11,6 +11,7 @@ pub mod mongodb;
 pub mod mysql;
 pub mod nats;
 pub mod postgres;
+pub mod redis;
 pub mod scylla;
 pub mod tidb;
 pub mod tikv;
@@ -46,6 +47,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "clickhouse" => clickhouse::ClickHouse::new().await,
         "etcd" => etcd::Etcd::new().await,
         "nats" => nats::NatsJetStream::new().await,
+        "redis" => redis::Redis::new().await,
         "tidb" => tidb::TiDB::new().await,
         "tikv" => tikv::TiKV::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
