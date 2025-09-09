@@ -324,6 +324,32 @@ services:
           cpus: "4"
           memory: 8096M
 
+  opensearch:
+    image: opensearchproject/opensearch:3.2.0
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - plugins.security.ssl.http.enabled=false
+      - plugins.security.ssl.transport.enabled=false
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=ForBenchmark1234!
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - "19201:9200"   # OpenSearch HTTP API
+      - "19301:9300"   # OpenSearch transport port
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+
 volumes:
   pgdata:
     driver: local
@@ -358,4 +384,6 @@ volumes:
   tikv_data:
     driver: local
   elasticsearch_data:
+    driver: local
+  opensearch_data:
     driver: local
