@@ -20,6 +20,7 @@ services:
     image: confluentinc/cp-kafka:7.4.0
     hostname: kafka
     container_name: kafka
+    user: "0:0"  # root 권한으로 실행
     ports:
       - "9092:9092"
       - "19092:19092"
@@ -48,14 +49,24 @@ services:
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
       
       # KRaft 관련 설정
-      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_LOG_DIRS: '/var/lib/kafka/data'
     volumes:
-      - kafka-logs:/tmp/kraft-combined-logs
+      - kafka-logs:/var/lib/kafka/data
+    command: >
+      bash -c "
+        # 디렉토리 권한 설정
+        mkdir -p /var/lib/kafka/data &&
+        chmod 755 /var/lib/kafka/data &&
+        chown -R appuser:appuser /var/lib/kafka/data &&
+        
+        # KRaft 모드로 Kafka 시작
+        /etc/confluent/docker/run
+      "
     deploy:
       resources:
         limits:
           cpus: "4"
-          memory: 4096M
+          memory: 8096M
 
 volumes:
   pgdata:
