@@ -15,3 +15,4 @@
 | DB         | Duration | TPS   | Avegate Latency | Min Latency | Max Latency | Disk Usage |
 | ---------- | -------- | ----- | --------------- | ----------- | ----------- | ---------- |
 | PostgreSQL | 545 s    | 13800 | 542 ms          | 26 ms       | 3581 ms     | 3.7 GB     |
+| Kafka      | 581 s    | 17184 | 580 ms          | 527 ms      | 1909 ms     | 2 GB       |
