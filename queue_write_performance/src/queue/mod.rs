@@ -1,5 +1,6 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod kafka;
 pub mod postgres;
 
 #[async_trait::async_trait]
@@ -18,6 +19,7 @@ pub trait Queue {
 pub async fn new_queue(queue_type: &str) -> Result<Arc<dyn Queue + Send + Sync>> {
     match queue_type {
         "postgres" => postgres::PostgresDB::new().await,
+        "kafka" => kafka::KafkaQueue::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }

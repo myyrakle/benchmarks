@@ -1,7 +1,7 @@
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use std::sync::Arc;
 
-use super::{Queue, Errors, Result};
+use super::{Errors, Queue, Result};
 
 #[derive(Debug)]
 pub struct PostgresDB {
