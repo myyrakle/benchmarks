@@ -14,7 +14,7 @@
 
 | DB             | Duration | TPS    | Avegate Latency | Min Latency | Max Latency | Disk Usage |
 | -------------- | -------- | ------ | --------------- | ----------- | ----------- | ---------- |
-| PostgreSQL     | 545 s    | 18315  | 542 ms          | 26 ms       | 3581 ms     | 3.7 GB     |
+| PostgreSQL     | 526 s    | 18861  | 526 ms          | 7 ms        | 2483 ms     | 3.7 GB     |
 | MySQL          | 3228 s   | 3143   | 3143 ms         | 53 ms       | 180705 ms   | 7.6 GB     |
 | MariaDB        | 2194 s   | 4751   | 2098 ms         | 3 ms        | 13098 ms    | 3.8 GB     |
 | MongoDB        | 376 s    | 26524  | 370 ms          | 201 ms      | 1288 ms     | 3.1 GB     |
