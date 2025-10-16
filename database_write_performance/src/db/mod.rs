@@ -1,5 +1,6 @@
 use std::{fmt::Debug, sync::Arc};
 
+pub mod barus;
 pub mod cassandra;
 pub mod clickhouse;
 pub mod cockroachdb;
@@ -56,6 +57,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "nats" => nats::NatsJetStream::new().await,
         "tidb" => tidb::TiDB::new().await,
         "tikv" => tikv::TiKV::new().await,
+        "barus" => barus::BarusDB::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
