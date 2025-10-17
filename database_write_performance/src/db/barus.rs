@@ -15,7 +15,11 @@ pub struct BarusDB {
 impl BarusDB {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
         let db = BarusDB {
-            client: Client::new(),
+            client: Client::builder()
+                .tcp_keepalive(Some(Duration::from_secs(30)))
+                .pool_max_idle_per_host(1000)
+                .build()
+                .unwrap(),
             base_url: "http://localhost:3000".to_string(),
             table_name: "benchmark_kv".to_string(),
         };

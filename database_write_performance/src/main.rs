@@ -40,6 +40,10 @@ async fn main() {
     // producer
     tokio::spawn(async move {
         for (i, line) in csv_text.lines().enumerate() {
+            if i >= 1000000 {
+                break;
+            }
+
             if i % 10000 == 0 {
                 println!("Writing {} lines", i);
             }

@@ -1,6 +1,7 @@
 use std::{fmt::Debug, sync::Arc};
 
 pub mod barus;
+pub mod barus_grpc;
 pub mod cassandra;
 pub mod clickhouse;
 pub mod cockroachdb;
@@ -58,6 +59,7 @@ pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Syn
         "tidb" => tidb::TiDB::new().await,
         "tikv" => tikv::TiKV::new().await,
         "barus" => barus::BarusDB::new().await,
+        "barus_grpc" => barus_grpc::BarusDBGrpc::new().await,
         _ => Err(Errors::ConnectionError("Unknown database type".into())),
     }
 }
