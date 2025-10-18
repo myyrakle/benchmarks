@@ -20,7 +20,7 @@ impl BarusDB {
                 .pool_max_idle_per_host(1000)
                 .build()
                 .unwrap(),
-            base_url: "http://localhost:3000".to_string(),
+            base_url: "http://localhost:53000".to_string(),
             table_name: "benchmark_kv".to_string(),
         };
 

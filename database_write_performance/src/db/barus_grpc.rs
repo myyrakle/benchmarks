@@ -20,7 +20,7 @@ pub struct BarusDBGrpc {
 
 impl BarusDBGrpc {
     pub async fn new() -> Result<Arc<dyn Database + Send + Sync>> {
-        let channel = Channel::from_static("http://localhost:50051")
+        let channel = Channel::from_static("http://localhost:53001")
             .http2_keep_alive_interval(Duration::from_secs(30))
             .keep_alive_timeout(Duration::from_secs(10))
             .keep_alive_while_idle(true)
