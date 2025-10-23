@@ -63,6 +63,22 @@ impl Database for BarusDB {
     }
 
     async fn setup(&self) -> Result<()> {
+        let url = format!("{}/tables/{}", self.base_url, self.table_name);
+        let response = self
+            .client
+            .post(&url)
+            .header("Content-Type", "application/json")
+            .body("{}")
+            .send()
+            .await
+            .map_err(|e| Errors::WriteError(e.to_string()))?;
+
+        if !response.status().is_success() {
+            return Err(Errors::WriteError("Failed to create table".into()));
+        }
+
+        println!("BarusDB: Table '{}' is set up.", self.table_name);
+
         Ok(())
     }
 
@@ -72,7 +88,7 @@ impl Database for BarusDB {
             "value": value
         });
 
-        let url = format!("{}/{}/value", self.base_url, self.table_name);
+        let url = format!("{}/tables/{}/value", self.base_url, self.table_name);
         let response = self
             .client
             .put(&url)
