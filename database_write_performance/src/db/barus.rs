@@ -74,6 +74,11 @@ impl Database for BarusDB {
             .map_err(|e| Errors::WriteError(e.to_string()))?;
 
         if !response.status().is_success() {
+            if response.status().as_u16() == 409 {
+                println!("BarusDB: Table '{}' already exists.", self.table_name);
+                return Ok(());
+            }
+
             return Err(Errors::WriteError("Failed to create table".into()));
         }
 
