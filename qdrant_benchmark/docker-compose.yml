@@ -1,0 +1,21 @@
+services:
+
+  qdrant:
+    image: qdrant/qdrant:v1.15.0
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant:/qdrant/storage
+    ulimits:
+      nofile: 65535
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
+
+volumes:
+  qdrant:
+    driver: local
