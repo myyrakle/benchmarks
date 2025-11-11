@@ -1,8 +1,8 @@
 use num_format::Locale;
 use num_format::ToFormattedString;
 use qdrant_client::Qdrant;
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -25,10 +25,10 @@ impl VectorConfig {
                 name: "512-Dot",
                 collection_name: "vectors_512".to_string(),
             },
-            VectorConfig {
-                name: "1024-Dot",
-                collection_name: "vectors_1024".to_string(),
-            },
+            // VectorConfig {
+            //     name: "1024-Dot",
+            //     collection_name: "vectors_1024".to_string(),
+            // },
         ]
     }
 }
@@ -46,8 +46,13 @@ pub async fn run_read_benchmark(
         println!("Starting READ benchmark for: {}", config.name);
         println!("{:=<70}", "");
 
-        run_single_collection_benchmark(client.clone(), &config, duration_secs, concurrent_requests)
-            .await?;
+        run_single_collection_benchmark(
+            client.clone(),
+            &config,
+            duration_secs,
+            concurrent_requests,
+        )
+        .await?;
     }
 
     Ok(())
@@ -98,9 +103,11 @@ async fn run_single_collection_benchmark(
 
                         use qdrant_client::qdrant::SearchPointsBuilder;
                         client_clone
-                            .search_points(
-                                SearchPointsBuilder::new(&config_clone.collection_name, query_vector, 10)
-                            )
+                            .search_points(SearchPointsBuilder::new(
+                                &config_clone.collection_name,
+                                query_vector,
+                                10,
+                            ))
                             .await
                     }
                     _ => {
@@ -108,8 +115,7 @@ async fn run_single_collection_benchmark(
                         use qdrant_client::qdrant::ScrollPointsBuilder;
                         client_clone
                             .scroll(
-                                ScrollPointsBuilder::new(&config_clone.collection_name)
-                                    .limit(10)
+                                ScrollPointsBuilder::new(&config_clone.collection_name).limit(10),
                             )
                             .await
                             .map(|_| qdrant_client::qdrant::SearchResponse {
@@ -210,8 +216,16 @@ fn print_read_results(
         0.0
     };
 
-    let min_latency_display = if min_latency_ms == u64::MAX { "N/A" } else { &min_latency_ms.to_string() };
-    let max_latency_display = if max_latency_ms == 0 { "N/A" } else { &max_latency_ms.to_string() };
+    let min_latency_display = if min_latency_ms == u64::MAX {
+        "N/A"
+    } else {
+        &min_latency_ms.to_string()
+    };
+    let max_latency_display = if max_latency_ms == 0 {
+        "N/A"
+    } else {
+        &max_latency_ms.to_string()
+    };
 
     println!("\nREAD Benchmark Results for {}", config.name);
     println!("{:-<70}", "");
@@ -229,6 +243,9 @@ fn print_read_results(
     println!("Min Latency:           {} ms", min_latency_display);
     println!("Max Latency:           {} ms", max_latency_display);
     println!("Average Latency:       {:.2} ms", avg_latency_ms);
-    println!("P50 Latency:           {:.2} ms (estimated)", avg_latency_ms);
+    println!(
+        "P50 Latency:           {:.2} ms (estimated)",
+        avg_latency_ms
+    );
     println!("{:-<70}", "");
 }

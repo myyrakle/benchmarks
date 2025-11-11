@@ -11,7 +11,7 @@ struct Cli {
     #[command(subcommand)]
     command: Commands,
 
-    #[arg(long, default_value = "http://localhost:6334")]
+    #[arg(long, default_value = "http://192.168.0.54:6334")]
     /// Qdrant server URL (REST API on port 6333, gRPC on port 6334)
     qdrant_url: String,
 }

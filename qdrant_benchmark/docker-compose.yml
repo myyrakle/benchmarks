@@ -1,5 +1,4 @@
 services:
-
   qdrant:
     image: qdrant/qdrant:v1.15.0
     container_name: qdrant
@@ -14,8 +13,33 @@ services:
       resources:
         limits:
           cpus: "4"
-          memory: 8096M
+          memory: 16192M
+
+  qdrant-gpu:
+    image: qdrant/qdrant:v1.15-gpu-nvidia
+    container_name: qdrant-gpu
+    ports:
+      - "16333:6333"
+      - "16334:6334"
+    volumes:
+      - qdrant_gpu:/qdrant/storage
+    environment:
+      - QDRANT__GPU__INDEXING=1
+    ulimits:
+      nofile: 65535
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+        limits:
+          cpus: "4"
+          memory: 16192M
 
 volumes:
   qdrant:
+    driver: local
+  qdrant_gpu:
     driver: local
