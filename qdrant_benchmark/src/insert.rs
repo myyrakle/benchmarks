@@ -1,15 +1,14 @@
 use chrono::Utc;
 use num_format::Locale;
 use num_format::ToFormattedString;
-use qdrant_client::Qdrant;
 use qdrant_client::qdrant::{
-    CreateCollectionBuilder, Distance, VectorParamsBuilder,
-    PointStruct, UpsertPointsBuilder,
+    CreateCollectionBuilder, Distance, PointStruct, UpsertPointsBuilder, VectorParamsBuilder,
 };
-use rand::Rng;
-use std::time::Instant;
-use serde_json::json;
 use qdrant_client::Payload;
+use qdrant_client::Qdrant;
+use rand::Rng;
+use serde_json::json;
+use std::time::Instant;
 
 use crate::metadata::{BRANDS, CATEGORIES, COLORS};
 
@@ -33,11 +32,11 @@ impl VectorConfig {
                 dimension: 512,
                 collection_name: "vectors_512".to_string(),
             },
-            VectorConfig {
-                name: "1024-Dot",
-                dimension: 1024,
-                collection_name: "vectors_1024".to_string(),
-            },
+            // VectorConfig {
+            //     name: "1024-Dot",
+            //     dimension: 1024,
+            //     collection_name: "vectors_1024".to_string(),
+            // },
         ]
     }
 }
@@ -57,7 +56,10 @@ pub async fn run_insert_benchmark(
         println!("{:=<70}", "");
 
         // Pre-generate all vectors and metadata BEFORE benchmarking
-        println!("Generating {} vectors...", total_count.to_formatted_string(&Locale::en));
+        println!(
+            "Generating {} vectors...",
+            total_count.to_formatted_string(&Locale::en)
+        );
         let generation_start = Instant::now();
         let all_points = generate_vectors(&config, total_count)?;
         let generation_time = generation_start.elapsed();
@@ -120,8 +122,9 @@ async fn create_collection(
     // Create new collection with Builder pattern
     client
         .create_collection(
-            CreateCollectionBuilder::new(&config.collection_name)
-                .vectors_config(VectorParamsBuilder::new(config.dimension as u64, Distance::Dot))
+            CreateCollectionBuilder::new(&config.collection_name).vectors_config(
+                VectorParamsBuilder::new(config.dimension as u64, Distance::Dot),
+            ),
         )
         .await?;
 
@@ -146,14 +149,11 @@ async fn insert_vectors(
         let batch_start = Instant::now();
 
         let current_batch_size = std::cmp::min(batch_size, total_count - total_inserted);
-        let batch_points: Vec<PointStruct> = all_points
-            .drain(0..current_batch_size)
-            .collect();
+        let batch_points: Vec<PointStruct> = all_points.drain(0..current_batch_size).collect();
 
         match client
             .upsert_points(
-                UpsertPointsBuilder::new(&config.collection_name, batch_points)
-                    .wait(true)
+                UpsertPointsBuilder::new(&config.collection_name, batch_points).wait(true),
             )
             .await
         {

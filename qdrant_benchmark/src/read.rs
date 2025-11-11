@@ -12,6 +12,7 @@ use tokio::task::JoinHandle;
 struct VectorConfig {
     name: &'static str,
     collection_name: String,
+    dimension: usize,
 }
 
 impl VectorConfig {
@@ -20,14 +21,17 @@ impl VectorConfig {
             VectorConfig {
                 name: "256-Dot",
                 collection_name: "vectors_256".to_string(),
+                dimension: 256,
             },
             VectorConfig {
                 name: "512-Dot",
                 collection_name: "vectors_512".to_string(),
+                dimension: 512,
             },
             // VectorConfig {
             //     name: "1024-Dot",
             //     collection_name: "vectors_1024".to_string(),
+            //     dimension: 1024,
             // },
         ]
     }
@@ -97,7 +101,7 @@ async fn run_single_collection_benchmark(
                 let result = match operation {
                     0 => {
                         // Vector search with random vector
-                        let query_vector: Vec<f32> = (0..256) // Use 256 for simplicity, actual dimension varies
+                        let query_vector: Vec<f32> = (0..config_clone.dimension)
                             .map(|_| rng.gen_range(-1.0f32..1.0f32))
                             .collect();
 
