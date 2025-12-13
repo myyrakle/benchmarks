@@ -3,11 +3,12 @@ use rayon::prelude::*;
 use serde::Serialize;
 use std::error::Error;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::BufWriter;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const VECTOR_DIM: usize = 512;
 const NUM_VECTORS: usize = 10_000_000;
+const VECTORS_PER_FILE: usize = 1_000_000; // 파일당 100만개
 const CHUNK_SIZE: usize = 10_000; // 청크 단위로 처리
 
 #[derive(Serialize)]
@@ -33,52 +34,55 @@ fn generate_normalized_vector(rng: &mut impl Rng) -> Vec<f32> {
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Generating {} vectors with {} dimensions...", NUM_VECTORS, VECTOR_DIM);
-
-    let file = File::create("vectors.json")?;
-    let mut writer = BufWriter::with_capacity(8 * 1024 * 1024, file); // 8MB 버퍼
-
-    writeln!(writer, "[")?;
+    println!("Splitting into {} files with {} vectors each", NUM_VECTORS / VECTORS_PER_FILE, VECTORS_PER_FILE);
 
     let progress = AtomicUsize::new(0);
+    let num_files = (NUM_VECTORS + VECTORS_PER_FILE - 1) / VECTORS_PER_FILE;
 
-    // 청크 단위로 병렬 처리
-    let num_chunks = (NUM_VECTORS + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    // 각 파일별로 처리
+    for file_idx in 0..num_files {
+        let file_start = file_idx * VECTORS_PER_FILE;
+        let file_end = ((file_idx + 1) * VECTORS_PER_FILE).min(NUM_VECTORS);
+        let file_name = format!("vectors_{}.bin", file_idx);
 
-    for chunk_idx in 0..num_chunks {
-        let start_id = chunk_idx * CHUNK_SIZE;
-        let end_id = ((chunk_idx + 1) * CHUNK_SIZE).min(NUM_VECTORS);
+        println!("Generating file {}/{}: {}", file_idx + 1, num_files, file_name);
 
-        // 병렬로 벡터 생성
-        let json_lines: Vec<String> = (start_id..end_id)
-            .into_par_iter()
-            .map(|id| {
-                let mut rng = rand::thread_rng();
-                let vector = generate_normalized_vector(&mut rng);
-                let data = VectorData { id, vector };
-                serde_json::to_string(&data).unwrap()
-            })
-            .collect();
+        let mut file_vectors = Vec::with_capacity(file_end - file_start);
 
-        // 순차적으로 파일에 쓰기
-        for (idx, json) in json_lines.iter().enumerate() {
-            let id = start_id + idx;
-            if id < NUM_VECTORS - 1 {
-                writeln!(writer, "  {},", json)?;
-            } else {
-                writeln!(writer, "  {}", json)?;
+        // 청크 단위로 병렬 처리
+        let num_chunks = ((file_end - file_start) + CHUNK_SIZE - 1) / CHUNK_SIZE;
+
+        for chunk_idx in 0..num_chunks {
+            let start_id = file_start + chunk_idx * CHUNK_SIZE;
+            let end_id = (start_id + CHUNK_SIZE).min(file_end);
+
+            // 병렬로 벡터 생성
+            let mut chunk_vectors: Vec<VectorData> = (start_id..end_id)
+                .into_par_iter()
+                .map(|id| {
+                    let mut rng = rand::thread_rng();
+                    let vector = generate_normalized_vector(&mut rng);
+                    VectorData { id, vector }
+                })
+                .collect();
+
+            file_vectors.append(&mut chunk_vectors);
+
+            let current = progress.fetch_add(end_id - start_id, Ordering::Relaxed) + (end_id - start_id);
+            if current % 100_000 <= CHUNK_SIZE {
+                println!("Progress: {}/{}", current, NUM_VECTORS);
             }
         }
 
-        let current = progress.fetch_add(end_id - start_id, Ordering::Relaxed) + (end_id - start_id);
-        if current % 100_000 <= CHUNK_SIZE {
-            println!("Progress: {}/{}", current, NUM_VECTORS);
-        }
+        // bincode로 직렬화하여 파일에 저장
+        let file = File::create(&file_name)?;
+        let writer = BufWriter::with_capacity(8 * 1024 * 1024, file);
+        bincode::serialize_into(writer, &file_vectors)?;
+
+        println!("Saved {} with {} vectors", file_name, file_vectors.len());
     }
 
-    writeln!(writer, "]")?;
-    writer.flush()?;
-
-    println!("Done! Vectors saved to vectors.json");
+    println!("Done! Vectors saved to {} binary files", num_files);
 
     Ok(())
 }
