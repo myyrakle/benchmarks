@@ -19,3 +19,7 @@ path = "./src/generate_vector.rs"
 [[bin]]
 name = "insert_to_qdrant"
 path = "./src/insert_to_qdrant.rs"
+
+[[bin]]
+name = "benchmark_read"
+path = "./src/benchmark_read.rs"
