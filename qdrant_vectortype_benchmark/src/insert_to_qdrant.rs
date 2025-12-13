@@ -1,5 +1,6 @@
 use qdrant_client::qdrant::{
-    CreateCollectionBuilder, Distance, UpsertPointsBuilder, VectorParamsBuilder,
+    CreateCollectionBuilder, Distance, ScalarQuantizationBuilder, UpsertPointsBuilder,
+    VectorParamsBuilder,
 };
 use qdrant_client::{Payload, Qdrant};
 use serde::Deserialize;
@@ -40,11 +41,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // 컬렉션 생성 (COSINE distance)
     println!("Creating collection '{}'...", COLLECTION_NAME);
+    // use qdrant_client::qdrant::Datatype;
+    // client
+    //     .create_collection(
+    //         CreateCollectionBuilder::new(COLLECTION_NAME).vectors_config(
+    //             VectorParamsBuilder::new(512, Distance::Cosine)
+    //                 .datatype(Datatype::Float16)
+    //                 .on_disk(false),
+    //         ),
+    //     )
+    //     .await?;
+
+    // client
+    //     .create_collection(
+    //         CreateCollectionBuilder::new(COLLECTION_NAME)
+    //             .vectors_config(VectorParamsBuilder::new(512, Distance::Cosine).on_disk(false)),
+    //     )
+    //     .await?;
+
     client
         .create_collection(
             CreateCollectionBuilder::new(COLLECTION_NAME).vectors_config(
                 VectorParamsBuilder::new(512, Distance::Cosine)
-                    // .datatype(Datatype::Float16)
+                    .quantization_config(
+                        ScalarQuantizationBuilder::default()
+                            .quantile(0.99)
+                            .always_ram(true)
+                            .build(),
+                    )
                     .on_disk(false),
             ),
         )

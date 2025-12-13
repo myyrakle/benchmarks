@@ -14,7 +14,7 @@ services:
     volumes:
       - qdrant_storage:/qdrant/storage
 
-  qdrant_f16:
+  qdrant_int8:
     image: qdrant/qdrant:v1.16.1
     ports:
       - "6333:6333"
@@ -27,10 +27,12 @@ services:
           cpus: "8"
           memory: 32G
     volumes:
-      - qdrant_f16_storage:/qdrant/storage
+      - qdrant_int8_storage:/qdrant/storage
 
 volumes:
   qdrant_storage:
     driver: local
   qdrant_f16_storage:
+    driver: local
+  qdrant_int8_storage:
     driver: local
