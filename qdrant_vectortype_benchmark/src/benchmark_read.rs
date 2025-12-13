@@ -12,8 +12,8 @@ use tokio::task::JoinSet;
 
 const COLLECTION_NAME: &str = "benchmark_vectors";
 const BENCHMARK_DURATION_SECS: u64 = 60; // 벤치마크 실행 시간
-const CONCURRENT_QUERIES: usize = 10; // 동시 쿼리 수
-const TOP_K: u64 = 10; // 검색 결과 개수
+const CONCURRENT_QUERIES: usize = 100; // 동시 쿼리 수
+const TOP_K: u64 = 50; // 검색 결과 개수
 
 #[derive(Deserialize, Clone)]
 struct VectorData {

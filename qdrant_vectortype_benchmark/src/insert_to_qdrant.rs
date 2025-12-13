@@ -42,8 +42,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Creating collection '{}'...", COLLECTION_NAME);
     client
         .create_collection(
-            CreateCollectionBuilder::new(COLLECTION_NAME)
-                .vectors_config(VectorParamsBuilder::new(512, Distance::Cosine).on_disk(false)),
+            CreateCollectionBuilder::new(COLLECTION_NAME).vectors_config(
+                VectorParamsBuilder::new(512, Distance::Cosine)
+                    // .datatype(Datatype::Float16)
+                    .on_disk(false),
+            ),
         )
         .await?;
 
@@ -65,7 +68,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let reader = BufReader::with_capacity(8 * 1024 * 1024, file);
         let vectors: Vec<VectorData> = bincode::deserialize_from(reader)?;
 
-        println!("Loaded {} vectors from {}. Starting insertion...", vectors.len(), file_name);
+        println!(
+            "Loaded {} vectors from {}. Starting insertion...",
+            vectors.len(),
+            file_name
+        );
 
         // 배치로 삽입
         for (batch_idx, chunk) in vectors.chunks(BATCH_SIZE).enumerate() {
@@ -86,12 +93,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             let processed = (batch_idx + 1) * BATCH_SIZE;
             if processed % 10_000 == 0 || processed >= vectors.len() {
-                println!("  File {}: {}/{}", file_idx, processed.min(vectors.len()), vectors.len());
+                println!(
+                    "  File {}: {}/{}",
+                    file_idx,
+                    processed.min(vectors.len()),
+                    vectors.len()
+                );
             }
         }
 
         total_inserted += vectors.len();
-        println!("Completed file {}. Total inserted: {}", file_idx, total_inserted);
+        println!(
+            "Completed file {}. Total inserted: {}",
+            file_idx, total_inserted
+        );
 
         file_idx += 1;
     }
