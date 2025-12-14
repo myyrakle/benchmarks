@@ -63,10 +63,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .create_collection(
             CreateCollectionBuilder::new(COLLECTION_NAME).vectors_config(
                 VectorParamsBuilder::new(512, Distance::Cosine)
+                    .datatype(qdrant_client::qdrant::Datatype::Uint8)
                     .quantization_config(
                         ScalarQuantizationBuilder::default()
                             .quantile(0.99)
-                            .always_ram(true)
+                            .always_ram(false)
                             .build(),
                     )
                     .on_disk(false),
