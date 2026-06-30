@@ -15,6 +15,7 @@ pub mod mysql;
 pub mod nats;
 pub mod opensearch;
 pub mod postgres;
+pub mod rrdb;
 pub mod scylla;
 pub mod tidb;
 pub mod tikv;
@@ -41,6 +42,7 @@ pub trait Database {
 pub async fn new_database(db_type: &str) -> Result<Arc<dyn Database + Send + Sync>> {
     match db_type {
         "postgres" => postgres::PostgresDB::new().await,
+        "rrdb" => rrdb::Rrdb::new().await,
         "mysql" => mysql::MySqlDB::new().await,
         "mariadb" => mariadb::MariaDB::new().await,
         "mongodb" => mongodb::MongoDB::new().await,

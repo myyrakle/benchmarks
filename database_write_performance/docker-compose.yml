@@ -15,6 +15,19 @@ services:
         limits:
           cpus: "4"
           memory: 8096M
+  rrdb:
+    image: myyrakle/rrdb:v0.0.2-beta
+    environment:
+      RUST_LOG: info
+    volumes:
+      - rrdb_data:/var/lib/rrdb
+    ports:
+      - "22208:22208"
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8096M
   mysql: 
     image: mysql:8
     environment:
@@ -352,6 +365,8 @@ services:
 
 volumes:
   pgdata:
+    driver: local
+  rrdb_data:
     driver: local
   mysql_data:
     driver: local
