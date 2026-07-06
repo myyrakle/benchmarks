@@ -43,7 +43,7 @@ impl Database for Rrdb {
 
         sqlx::query(
             "CREATE TABLE key_value (
-                key VARCHAR(255),
+                key VARCHAR(255) PRIMARY KEY,
                 value VARCHAR(65535)
             )",
         )

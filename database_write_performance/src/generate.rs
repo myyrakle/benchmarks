@@ -1,7 +1,7 @@
 use rand::Rng;
 
 fn main() {
-    let count = 10001;
+    let count = 100000;
 
     // length 20-500 random string
     let mut rng = rand::rng();
