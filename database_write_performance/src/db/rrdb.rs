@@ -55,13 +55,9 @@ impl Database for Rrdb {
     }
 
     async fn write(&self, key: &str, value: &str) -> Result<()> {
-        let sql = format!(
-            "INSERT INTO key_value (key, value) VALUES ('{}', '{}')",
-            escape_sql_string(key),
-            escape_sql_string(value),
-        );
-
-        sqlx::query(&sql)
+        sqlx::query("INSERT INTO key_value (key, value) VALUES ($1, $2)")
+            .bind(key)
+            .bind(value)
             .execute(&self.pool)
             .await
             .map_err(|error| Errors::WriteError(error.to_string()))?;
@@ -72,8 +68,4 @@ impl Database for Rrdb {
     fn worker_count(&self) -> usize {
         1000
     }
-}
-
-fn escape_sql_string(value: &str) -> String {
-    value.replace('\'', "''")
 }
